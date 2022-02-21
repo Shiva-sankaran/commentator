@@ -8,6 +8,9 @@ import Login from './Auth/Login';
 import Signup from './Auth/Signup';
 import Home from './Home/Home';
 
+// COMPONENTS
+import ProtectedRoute from './utils/ProtectedRoute';
+
 const Router = () => {
     const history = createBrowserHistory();
 
@@ -16,7 +19,9 @@ const Router = () => {
             <Routes>
                 <Route path="/login" exact element={<Login />} />
                 <Route path="/signup" exact element={<Signup />} />
-                <Route path="/" exact element={<Home />} />
+                <Route path="/" exact element={<ProtectedRoute />}>
+                    <Route exact path='/' element={<Home/>}/>
+                </Route>
             </Routes>
         </BrowserRouter>
     );

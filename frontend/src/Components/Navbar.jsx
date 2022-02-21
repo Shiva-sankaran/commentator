@@ -3,12 +3,43 @@ import React from 'react';
 // Libs
 import styled from 'styled-components';
 import { PowerSettingsNew } from '@mui/icons-material';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+    const history = useNavigate();
+    const logged_in_user = JSON.parse(sessionStorage.getItem('annote_user'));
+    const logoutHandler = async () => {
+
+        const res = await axios.post('/logout', {
+            method: "POST",
+            headers: {
+                'Content-type': 'application-json',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
+        // const resFinal = await res;
+        console.log(res.data);
+        sessionStorage.setItem('annote_user', false)
+        history('/login');
+        // fetch('/signup', {
+        //     method: 'POST',
+        //     headers: {
+        //       'Content-type': 'application-json'
+        //     },
+        //     body: JSON.stringify(data)
+        //   })
+        //   .then(res => res.json())
+        //   .then(res => console.log(res))
+        //   .catch(err => console.log(err));
+    };
     return (
         <StyledNavbarContainer>
             <StyledName>Annotex</StyledName>
-            <StyledPowerOff />
+            <StyledFlex>
+                <StyledUsername>{logged_in_user}</StyledUsername>
+                <StyledPowerOff onClick={logoutHandler}/>
+            </StyledFlex>
         </StyledNavbarContainer>
     );
 };
@@ -37,4 +68,18 @@ const StyledName = styled.p`
 const StyledPowerOff = styled(PowerSettingsNew)`
     margin-right: 16px;
     color: #fefefe;
+`;
+
+const StyledFlex = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+`;
+
+const StyledUsername = styled.div`
+    color: #efefef;
+    border-bottom: 1px solid #efefef;
+    padding-bottom: 6px;
 `;

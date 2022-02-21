@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 // Libs
 import styled from 'styled-components';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 // Styles
 import {
@@ -11,8 +13,37 @@ import {
 } from '../utils/styles';
 
 const Login = props => {
+    const history = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    const onSubmitHandler = async () => {
+        const data = {
+            username,
+            password,
+        };
+        const res = await axios.post('/login', {
+            method: "POST",
+            headers: {
+                'Content-type': 'application-json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(data)
+        });
+        // const resFinal = await res;
+        (res.data.success) && sessionStorage.setItem('annote_user', true);
+        (res.data.success) && history('/');
+        // fetch('/signup', {
+        //     method: 'POST',
+        //     headers: {
+        //       'Content-type': 'application-json'
+        //     },
+        //     body: JSON.stringify(data)
+        //   })
+        //   .then(res => res.json())
+        //   .then(res => console.log(res))
+        //   .catch(err => console.log(err));
+    };
 
     return (
         <StyledBox
@@ -26,7 +57,7 @@ const Login = props => {
             <StyledHeader>Login</StyledHeader>
             <StyledTextField id="login_username" label="username" variant="outlined" onChange={e => setUsername(e.target.value)}/>
             <StyledTextField id="login_password" label="password" variant="outlined" onChange={e => setPassword(e.target.value)} type='password'/>
-            <StyledButton variant="contained">Submit</StyledButton>
+            <StyledButton variant="contained" onClick={onSubmitHandler}>Submit</StyledButton>
         </StyledBox>
     );
 };

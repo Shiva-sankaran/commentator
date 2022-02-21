@@ -3,6 +3,8 @@ import React, { useState } from "react";
 // Libs
 import styled from 'styled-components';
 import Alert from '@mui/material/Alert';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 // Styles
 import {
@@ -13,6 +15,7 @@ import {
 
 
 const Signup = props => {
+    const history = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,8 +32,33 @@ const Signup = props => {
         }
     };
 
-    const onSubmitHandler = () => {
+    const onSubmitHandler = async () => {
         passwordMatcher();
+        const data = {
+            username,
+            password,
+        };
+        const res = await axios.post('/signup', {
+            method: "POST",
+            headers: {
+                'Content-type': 'application-json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(data)
+        });
+        // const resFinal = await res;
+        console.log((res.data));
+        history('/');
+        // fetch('/signup', {
+        //     method: 'POST',
+        //     headers: {
+        //       'Content-type': 'application-json'
+        //     },
+        //     body: JSON.stringify(data)
+        //   })
+        //   .then(res => res.json())
+        //   .then(res => console.log(res))
+        //   .catch(err => console.log(err));
     };
 
     return (
