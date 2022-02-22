@@ -7,10 +7,36 @@ import styled from 'styled-components';
 import Navbar from '../Components/Navbar';
 import LanguageBtn from '../Components/LanguageBtn';
 
+// Utils
+import LanguageDetect from '../utils/LanguageDetect';
+import EnglishSplitter from '../utils/EnglishSplitter';
+import HindiSplitter from '../utils/HindiSplitter';
+
 const Home = props => {
     const [ selected, setSelected ] = useState('e');
 
-    const words = "Hi, this is Shubh. This is an Annotation tool.".match(/\b(\w+)\b/g);
+    // const [words, setWords] = useState(wordArr);
+
+    // const sentence = "Hi, this is Shubh. This is an Annotation tool.";
+    const sentence = "नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।";
+
+    // const words = EnglishSplitter(sentence);
+    const {en, hi} = LanguageDetect(sentence);
+    console.log('en: ', en, 'hi: ', hi);
+    const wordArr = (sent) => {
+        if(en > hi){
+            return (EnglishSplitter(sent));
+        } else {
+            return (HindiSplitter(sent));
+        }
+    };
+    const [words, setWords] = useState(wordArr(sentence));
+    useEffect(() => {
+        console.log(wordArr(sentence));
+        setWords(wordArr(sentence));
+    }, [sentence]);
+
+    // console.log(HindiSplitter());
     const [tag, setTag] = useState([]);
 
     useEffect(() => {
@@ -22,7 +48,7 @@ const Home = props => {
             index: counter++,
         }));
         setTag(lst);
-    }, [selected]);
+    }, [selected, words]);
 
     useEffect(() => {
         console.log(selected);
@@ -64,23 +90,31 @@ const Home = props => {
     return (
         <StyledContainer>
             <Navbar />
-            <StyledDisplaySentenceContainer>
-                {/* <StyledSentence>नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।</StyledSentence> */}
-                <StyledSentence>Hi, this is Shubh. This is an Annotation tool.</StyledSentence>
-            </StyledDisplaySentenceContainer>
+            <StyledSentenceContainer>
+                <StyledDisplaySentenceContainer>
+                    {/* <StyledSentence>नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।</StyledSentence> */}
+                    <StyledSentence>{sentence}</StyledSentence>
+                </StyledDisplaySentenceContainer>
+                <div>
+                    <LanguageBtn selected={selected} setSelected={setSelected}/>
+                </div>
+            </StyledSentenceContainer>
+            
             <div>
-                <LanguageBtn selected={selected} setSelected={setSelected}/>
+                <StyledWordBreakup>
+                    Individual Word Tags
+                </StyledWordBreakup>
+                <StyledFlex>
+                    {tag.map(elem => {
+                        console.log(selected, elem.value, selected === (elem.value));
+                        return (
+                            <StyledWord 
+                            // style={{ backgroundColor: selected === elem.value ? 'green' : 'red' }}
+                            lang={selected} individualTag={elem.value} key={elem.key} onClick={() => updateTagForWord(elem)}>{elem.key}</StyledWord>
+                        );
+                    })}
+                </StyledFlex>
             </div>
-            <StyledFlex>
-                {tag.map(elem => {
-                    console.log(selected, elem.value, selected === (elem.value));
-                    return (
-                        <StyledWord 
-                        // style={{ backgroundColor: selected === elem.value ? 'green' : 'red' }}
-                        lang={selected} individualTag={elem.value} key={elem.key} onClick={() => updateTagForWord(elem)}>{elem.key}</StyledWord>
-                    );
-                })}
-            </StyledFlex>
         </StyledContainer>
     );
 };
@@ -100,9 +134,12 @@ const StyledDisplaySentenceContainer = styled.div`
 `;
 
 const StyledSentence = styled.p`
-    font-size: 26px;
+    font-size: 32px;
     margin: 12px;
     text-align: left;
+    background-color: #efefef;
+    padding: 18px;
+    border-radius: 12px;
 `;
 
 const StyledFlex = styled.div`
@@ -125,4 +162,19 @@ const StyledWord = styled.div`
     display:flex;
     flex: 1;
     justify-content: center;
+`;
+
+const StyledWordBreakup = styled.div`
+    font-size: 20px;
+    text-align: center;
+    margin: 28px auto 12px auto;
+`;
+
+const StyledSentenceContainer = styled.div`
+    border: 2px solid #efefef;
+    padding: 24px;
+    border-radius: 12px;
+    width: max-content;
+    text-align: center;
+    margin: 24px auto;
 `;

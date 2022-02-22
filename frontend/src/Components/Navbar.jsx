@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const history = useNavigate();
-    const logged_in_user = JSON.parse(sessionStorage.getItem('annote_user'));
+    const logged_in_user = JSON.parse(sessionStorage.getItem('annote_username'));
     const logoutHandler = async () => {
 
         const res = await axios.post('/logout', {

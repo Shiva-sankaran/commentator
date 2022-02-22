@@ -31,7 +31,9 @@ const Login = props => {
             body: JSON.stringify(data)
         });
         // const resFinal = await res;
+        // console.log(res.data.success.username)
         (res.data.success) && sessionStorage.setItem('annote_user', true);
+        (res.data.success) && sessionStorage.setItem('annote_username', JSON.stringify(res.data.success.username));
         (res.data.success) && history('/');
         // fetch('/signup', {
         //     method: 'POST',
