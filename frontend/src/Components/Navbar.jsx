@@ -21,6 +21,8 @@ const Navbar = () => {
         // const resFinal = await res;
         console.log(res.data);
         sessionStorage.setItem('annote_user', false)
+        sessionStorage.setItem('annote_username', "")
+        sessionStorage.setItem('annote_sentId', 0)
         history('/login');
         // fetch('/signup', {
         //     method: 'POST',

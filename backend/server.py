@@ -76,14 +76,18 @@ def login():
     # for elem in requestdata:
     #     print(elem)
     username = requestdata['username']
+    # username = requestdata['username']
     # password = sha256_crypt.hash(str(requestdata['password']))
     password = str(requestdata['password'])
     print(username, password)
 
     result = cur.execute("SELECT * FROM Users WHERE username = %s", [username])
+    sentId = 0
     if result > 0:
         data = cur.fetchone()
         print(data['password'])
+        sentId = data['sentId']
+        print(data['sentId'])
         print(sha256_crypt.verify(password, data['password']))
         # userID = data['id']
         # role = data['role']
@@ -106,7 +110,8 @@ def login():
 
     returning = {
         # 'userId': session['user_id'],
-        'username': session['username']
+        'username': session['username'],
+        'sentId': sentId
     }
     return jsonify({'success': returning})
 
@@ -126,6 +131,15 @@ def is_logged_in(f):
 def logout():
     session.clear()
     return jsonify({'message': "You are logged out"})
+
+
+@app.route('/get-sentence', methods=['POST'])
+# @is_logged_in
+def get_sentence():
+    cur = connection.cursor()
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    return requestdata
 
 
 if __name__ == '__main__':

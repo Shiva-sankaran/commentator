@@ -34,6 +34,7 @@ const Login = props => {
         // console.log(res.data.success.username)
         (res.data.success) && sessionStorage.setItem('annote_user', true);
         (res.data.success) && sessionStorage.setItem('annote_username', JSON.stringify(res.data.success.username));
+        (res.data.success) && sessionStorage.setItem('annote_sentId', JSON.stringify(res.data.success.sentId));
         (res.data.success) && history('/');
         // fetch('/signup', {
         //     method: 'POST',

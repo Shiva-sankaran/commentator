@@ -11,8 +11,16 @@ import LanguageBtn from '../Components/LanguageBtn';
 import LanguageDetect from '../utils/LanguageDetect';
 import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
+import FetchSentence from '../utils/FetchSentence';
 
 const Home = props => {
+    const [s, setS] = useState('');
+    useEffect(() => {
+        const x = async () => {
+            console.log(await FetchSentence());
+        };
+        x();
+    }, []);
     const [ selected, setSelected ] = useState('e');
 
     // const [words, setWords] = useState(wordArr);
