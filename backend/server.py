@@ -52,7 +52,7 @@ def register():
     if result > 0:
         return jsonify({"error_message": "The username has already been taken"})
     else:
-        cur.execute("INSERT INTO users(username, password) VALUES( %s, %s)",
+        cur.execute("INSERT INTO Users (username, password, sentId) VALUES ( %s, %s, 0)",
                     (username, password))
         connection.commit()
 
@@ -139,7 +139,51 @@ def get_sentence():
     cur = connection.cursor()
     requestdata = json.loads(request.data)
     print(requestdata)
-    return requestdata
+    requestdata = json.loads(requestdata['body'])
+
+    sentId = requestdata['id']
+    print(sentId)
+    result = cur.execute("SELECT * FROM Sentences WHERE sid = %s", [sentId])
+    data = cur.fetchone()
+    sentence = data['sentence']
+    result = {
+        'sentence': sentence,
+        'sentId': sentId,
+        'message': "Sentence Fetched Successfully."
+    }
+    cur.close()
+    return jsonify({'result': result})
+
+
+@app.route('/submit-sentence', methods=['POST'])
+# @is_logged_in
+def submit_sentence():
+    cur = connection.cursor()
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    sentId = requestdata['sentId']
+    selected = requestdata['selected']
+    tag = requestdata['tag']
+    username = requestdata['username']
+
+    print(sentId, selected, tag, username)
+
+    uid_query = cur.execute(
+        'SELECT uid FROM Users WHERE username = %s', [username])
+    print(uid_query)
+
+    result = cur.execute('INSERT INTO UserTagList (uid, sid, stag, grammar) VALUES (%s, %s, %s, %s)', [
+                         uid_query, sentId, str(tag), selected])
+    connection.commit()
+    # upd = cur.execute('UPDATE Users SET sentId = %s WHERE uid = %s', [
+    #                   sentId, username])
+    # connection.commit()
+    print('\nRes: ', result)
+    # print('\nUpd: ', upd)
+    cur.close()
+    return jsonify({'result': 'Message Stored Successfully'})
 
 
 if __name__ == '__main__':

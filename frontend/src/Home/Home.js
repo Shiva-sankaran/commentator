@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Libs
 import styled from 'styled-components';
+import axios from 'axios';
 
 // Components
 import Navbar from '../Components/Navbar';
@@ -13,23 +15,28 @@ import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
 import FetchSentence from '../utils/FetchSentence';
 
+import { StyledButton } from '../utils/styles';
+
 const Home = props => {
-    const [s, setS] = useState('');
+    const history = useNavigate();
+    const [sentence, setSentence] = useState('');
+    const [sentId, setSentId] = useState('');
     useEffect(() => {
         const x = async () => {
-            console.log(await FetchSentence());
+            const dict = await FetchSentence();
+            console.log(dict['sentence'], dict['sentId'])
+            setSentence(dict['sentence']);
+            setSentId(dict['sentId'])
         };
         x();
     }, []);
+
     const [ selected, setSelected ] = useState('e');
 
-    // const [words, setWords] = useState(wordArr);
-
     // const sentence = "Hi, this is Shubh. This is an Annotation tool.";
-    const sentence = "नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।";
+    // const sentence = "नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।";
 
-    // const words = EnglishSplitter(sentence);
-    const {en, hi} = LanguageDetect(sentence);
+    const {en, hi} = LanguageDetect(sentence.length > 0 ? sentence : "");
     console.log('en: ', en, 'hi: ', hi);
     const wordArr = (sent) => {
         if(en > hi){
@@ -38,13 +45,14 @@ const Home = props => {
             return (HindiSplitter(sent));
         }
     };
-    const [words, setWords] = useState(wordArr(sentence));
+    const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
-        console.log(wordArr(sentence));
-        setWords(wordArr(sentence));
+        if(sentence.length > 0){
+            console.log(wordArr(sentence));
+            setWords(wordArr(sentence));
+        }
     }, [sentence]);
 
-    // console.log(HindiSplitter());
     const [tag, setTag] = useState([]);
 
     useEffect(() => {
@@ -76,23 +84,36 @@ const Home = props => {
     }, [tag]);
 
     const updateTagForWord = word  => {
-        // setTag([
-        //     ...tag,
-        //     tag[index] = {
-        //         key: word.key,
-        //         value: toggle(word.value)
-        //     }
-        // ]);
         let lst = [...tag];
         lst[word.index] = {
             key: word.key,
             value: toggle(word.value),
             index: word.index,
         }
-        // console.log(lst);
         console.log('Selected', selected, 'Word_Value: ', toggle(word.value));
         setTag(lst);
         setSelected(selected);
+    };
+
+    const onSubmitHandler = async () => {
+        const username = JSON.parse(sessionStorage.getItem('annote_username'));
+        const data = {
+            selected,
+            tag,
+            sentId,
+            username
+        };
+        const res = await axios.post('/submit-sentence', {
+            method: "POST",
+            headers: {
+                'Content-type': 'application-json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(data)
+        });
+        console.log(res);
+        sessionStorage.setItem('annote_sentId', sentId)
+        window.location.reload()
     };
 
     return (
@@ -123,6 +144,10 @@ const Home = props => {
                     })}
                 </StyledFlex>
             </div>
+
+            <StyledSubmitContainer>
+                <StyledButton style={{ width: '100%' }} variant="contained" onClick={onSubmitHandler}>Submit</StyledButton>
+            </StyledSubmitContainer>
         </StyledContainer>
     );
 };
@@ -185,4 +210,10 @@ const StyledSentenceContainer = styled.div`
     width: max-content;
     text-align: center;
     margin: 24px auto;
+`;
+
+const StyledSubmitContainer = styled.div`
+    width: 20%;
+    text-align: center;
+    margin: 40px auto;
 `;

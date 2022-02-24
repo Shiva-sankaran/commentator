@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const FetchSentence = async () => {
-    const id = 50
+    const id = JSON.parse(sessionStorage.getItem('annote_sentId')) + 1;
     const data = {
         id,
     };
@@ -13,8 +13,8 @@ const FetchSentence = async () => {
         },
         body: JSON.stringify(data)
     });
-    console.log(res);
-    return res;
+    console.log(res.data.result);
+    return res.data.result;
 };
 
 export default FetchSentence;
