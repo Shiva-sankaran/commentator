@@ -177,11 +177,11 @@ def submit_sentence():
     result = cur.execute('INSERT INTO UserTagList (uid, sid, stag, grammar) VALUES (%s, %s, %s, %s)', [
                          uid_query, sentId, str(tag), selected])
     connection.commit()
-    # upd = cur.execute('UPDATE Users SET sentId = %s WHERE uid = %s', [
-    #                   sentId, username])
-    # connection.commit()
+    upd = cur.execute('UPDATE Users SET sentId = %s WHERE username = %s', [
+                      sentId, username])
+    connection.commit()
     print('\nRes: ', result)
-    # print('\nUpd: ', upd)
+    print('\nUpd: ', upd)
     cur.close()
     return jsonify({'result': 'Message Stored Successfully'})
 

@@ -7,6 +7,6 @@ connection = pymysql.connect(host='localhost',
                              cursorclass=pymysql.cursors.DictCursor)
 
 cur = connection.cursor()
-result = cur.execute("SELECT * FROM UserTagList")
+result = cur.execute("ALTER TABLE UserTagList ADD COLUMN grammar CHAR(1)")
 print(result)
 cur.close()
