@@ -119,6 +119,7 @@ const Home = props => {
     return (
         <StyledContainer>
             <Navbar />
+            <StyledSentenceId>#{sentId}</StyledSentenceId>
             <StyledSentenceContainer>
                 <StyledDisplaySentenceContainer>
                     {/* <StyledSentence>नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।</StyledSentence> */}
@@ -216,4 +217,13 @@ const StyledSubmitContainer = styled.div`
     width: 20%;
     text-align: center;
     margin: 40px auto;
+`;
+
+const StyledSentenceId = styled.div`
+    background-color: #efefef;
+    border-radius: 12px;
+    padding: 12px;
+    position: fixed;
+    top: 75px;
+    right: 20px;
 `;

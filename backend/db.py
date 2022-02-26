@@ -1,12 +1,14 @@
-import pymysql.cursors
+import pymongo
+conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/test"
 
-connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='root',
-                             database='annotation_sql',
-                             cursorclass=pymysql.cursors.DictCursor)
+# set a 5-second connection timeout
+client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
+database = client['annotation_tool']
 
-cur = connection.cursor()
-result = cur.execute("ALTER TABLE UserTagList ADD COLUMN grammar CHAR(1)")
-print(result)
-cur.close()
+sentences_collection = database.get_collection('sentences')
+
+sentences_collection.insert_many([
+    {'sid': 1, 'sentence': 'Hi, this is the first sentence'},
+    {'sid': 2, 'sentence': '2nd Sentence in the database'},
+    {'sid': 3, 'sentence': 'नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।'}
+])
