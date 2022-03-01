@@ -1,5 +1,5 @@
 import pymongo
-from flask import Flask, jsonify, request, json, session
+from flask import Flask, jsonify, render_template, request, json, session, send_from_directory
 from flask_session import Session
 
 from passlib.hash import sha256_crypt
@@ -9,27 +9,22 @@ from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
-SECRET_KEY = 'annotation_key'
-SESSION_TYPE = 'filesystem'
-
 cors = CORS(app, resources={
-            r"/register": {"origins": "http://127.0.0.1:5000"}})
-app.config['CORS_HEADERS'] = 'Content-Type'
+            r"/register": {"origins": "http://127.0.0.1:5000"}}, static_folder='../frontend/build')
 app.config.from_pyfile('config.py')
 Session(app)
 
 sess = Session()
-app.secret_key = SECRET_KEY
-app.config['SESSION_TYPE'] = 'filesystem'
 sess.init_app(app)
 
 
-conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/test"
+# conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/test"
+conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 # set a 5-second connection timeout
 client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
 database = client['annotation_tool']
 try:
-    print(client.server_info())
+    print("\nConnected to the db.\n")
 except Exception:
     print("Unable to connect to the server.")
 

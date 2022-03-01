@@ -1,9 +1,7 @@
 import os
 
 DEBUG = True
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = os.getenv('MYSQL_PWD')
-MYSQL_DB = 'annotation_sql'
-MYSQL_CURSORCLASS = 'DictCursor'
-SECRET_KEY = 'your_secret_key'
+SECRET_KEY = 'annotation_key'
+SESSION_TYPE = 'filesystem'
+CORS_HEADERS = 'Content-Type'
+MONGO_URI = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
