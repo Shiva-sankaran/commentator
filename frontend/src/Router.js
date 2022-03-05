@@ -10,6 +10,9 @@ import Home from './Home/Home';
 
 // COMPONENTS
 import ProtectedRoute from './utils/ProtectedRoute';
+import Intermediate from './Home/Intermediate';
+import Profile from './User/Profile';
+import Edit from './Edit/Edit';
 
 const Router = () => {
     const history = createBrowserHistory();
@@ -19,7 +22,13 @@ const Router = () => {
             <Routes>
                 <Route path="/login" exact element={<Login />} />
                 <Route path="/signup" exact element={<Signup />} />
+                {/* <Route path="/" exact element={<ProtectedRoute />}>
+                    <Route exact path='/intermediate' element={<Intermediate/>}/>
+                </Route> */}
                 <Route path="/" exact element={<ProtectedRoute />}>
+                    <Route exact path='/profile' element={<Profile/>}/>
+                    <Route exact path='/edit/:sid' element={<Edit/>}/>
+                    <Route exact path='/intermediate' element={<Intermediate/>}/>
                     <Route exact path='/' element={<Home/>}/>
                 </Route>
             </Routes>

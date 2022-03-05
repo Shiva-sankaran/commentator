@@ -160,15 +160,67 @@ def submit_sentence():
     selected = requestdata['selected']
     tag = requestdata['tag']
     username = requestdata['username']
+    date = requestdata['date']
+
+    lst = [selected, date, tag]
+    print(lst)
 
     print(sentId, selected, tag, username)
 
     user_collection.update_one({'username': username}, {
         '$set': {'sentId': sentId},
-        '$push': {'sentTag': tag}
+        '$push': {'sentTag': lst}
     })
 
     return jsonify({'result': 'Message Stored Successfully'})
+
+
+@app.route('/submit-edit-sentence', methods=['POST'])
+# @is_logged_in
+def submit_edit_sentence():
+    user_collection = database.get_collection('users')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    sentId = requestdata['sentId']
+    selected = requestdata['selected']
+    tag = requestdata['tag']
+    username = requestdata['username']
+    date = requestdata['date']
+
+    lst = [selected, date, tag]
+    print(lst)
+
+    print(sentId, selected, tag, username)
+
+    user_collection.update_one({'username': username, 'sentTag[0]': ''}, {
+        '$set': {'sentId': sentId},
+        '$push': {'sentTag': lst}
+    })
+
+    return jsonify({'result': 'Message Stored Successfully'})
+
+
+@app.route('/all-sentences', methods=['POST'])
+# @is_logged_in
+def all_sentence():
+    user_collection = database.get_collection('users')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    username = json.loads(requestdata['username'])
+
+    print('username: ', username)
+
+    result = user_collection.find({'username': username})
+    print(result)
+    res = list(result)
+    res = res[0]
+    print(res)
+
+    return jsonify({'result': res['sentTag']})
 
 
 if __name__ == '__main__':

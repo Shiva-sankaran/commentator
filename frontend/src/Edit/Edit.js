@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 // Libs
 import styled from 'styled-components';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 // Components
 import Navbar from '../Components/Navbar';
@@ -13,18 +14,21 @@ import LanguageBtn from '../Components/LanguageBtn';
 import LanguageDetect from '../utils/LanguageDetect';
 import EnglishSplitter from '../utils/EnglishSplitter';
 import HindiSplitter from '../utils/HindiSplitter';
-import FetchSentence from '../utils/FetchSentence';
+import FetchSentence from '../utils/FetchEdit';
 
 import { StyledButton } from '../utils/styles';
 import Steps from '../Components/Steps';
 
-const Home = props => {
+const Edit = props => {
+    const { sid } = useParams();
     const history = useNavigate();
     const [sentence, setSentence] = useState('');
-    const [sentId, setSentId] = useState('');
+    const [sentId, setSentId] = useState(sid);
+    console.log(sentId);
+
     useEffect(() => {
         const x = async () => {
-            const dict = await FetchSentence();
+            const dict = await FetchSentence(sid);
             console.log(dict['sentence'], dict['sentId'])
             setSentence(dict['sentence']);
             setSentId(dict['sentId'])
@@ -161,7 +165,7 @@ const Home = props => {
     );
 };
 
-export default Home;
+export default Edit;
 
 const StyledContainer = styled.div`
     height: 100vh;

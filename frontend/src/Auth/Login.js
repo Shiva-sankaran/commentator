@@ -39,7 +39,7 @@ const Login = (props) => {
         "annote_sentId",
         JSON.stringify(res.data.success.sentId)
       );
-    (res.data.success) && history('/');
+    (res.data.success) && history('/intermediate');
     // fetch('/signup', {
     //     method: 'POST',
     //     headers: {

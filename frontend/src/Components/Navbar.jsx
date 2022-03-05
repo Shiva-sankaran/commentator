@@ -37,9 +37,9 @@ const Navbar = () => {
     };
     return (
         <StyledNavbarContainer>
-            <StyledName>Annotex</StyledName>
+            <StyledName onClick={() => history('/')}>Annotex</StyledName>
             <StyledFlex>
-                <StyledUsername>{logged_in_user}</StyledUsername>
+                <StyledUsername onClick={() => history('/profile')} style={{ cursor: 'pointer' }}>{logged_in_user}</StyledUsername>
                 <StyledPowerOff onClick={logoutHandler}/>
             </StyledFlex>
         </StyledNavbarContainer>
@@ -65,11 +65,13 @@ const StyledName = styled.p`
     color: #fefefe;
     font-size: 26px;
     margin-left: 16px;
+    cursor: pointer;
 `;
 
 const StyledPowerOff = styled(PowerSettingsNew)`
     margin-right: 16px;
     color: #fefefe;
+    cursor: pointer;
 `;
 
 const StyledFlex = styled.div`
