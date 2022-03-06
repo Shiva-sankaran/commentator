@@ -110,7 +110,7 @@ const Edit = props => {
             username,
             date
         };
-        const res = await axios.post('/submit-sentence', {
+        const res = await axios.post('/submit-edit-sentence', {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',
@@ -119,8 +119,9 @@ const Edit = props => {
             body: JSON.stringify(data)
         });
         console.log(res);
-        sessionStorage.setItem('annote_sentId', sentId)
-        window.location.reload()
+        // sessionStorage.setItem('annote_sentId', sentId)
+        // window.location.reload();
+        history('/profile');
     };
 
     return (

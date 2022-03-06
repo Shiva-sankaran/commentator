@@ -194,10 +194,18 @@ def submit_edit_sentence():
 
     print(sentId, selected, tag, username)
 
-    user_collection.update_one({'username': username, 'sentTag[0]': ''}, {
-        '$set': {'sentId': sentId},
-        '$push': {'sentTag': lst}
+    user = user_collection.find({'username': username})
+    user = list(user)
+    sentTag = user[0]['sentTag']
+    sentTag[sentId - 1] = lst
+
+    user_collection.update_one({'username': username}, {
+        '$set': {'sentTag': sentTag}
     })
+
+    # user_collection.update_one({'username': username}, {
+    #     '$set': {'sentTag[{sentId}]'.format(sentId=sentId-1): lst},
+    # })
 
     return jsonify({'result': 'Message Stored Successfully'})
 
