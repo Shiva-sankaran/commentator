@@ -22,6 +22,7 @@ const Home = props => {
     const history = useNavigate();
     const [sentence, setSentence] = useState('');
     const [sentId, setSentId] = useState('');
+    const [hypertext, setHypertext] = useState([]);
     useEffect(() => {
         const x = async () => {
             const dict = await FetchSentence();
@@ -49,10 +50,17 @@ const Home = props => {
     const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
         if(sentence.length > 0){
-            console.log(wordArr(sentence));
-            setWords(wordArr(sentence));
+            let {sent, links} = wordArr(sentence);
+            console.log(sent);
+            console.log(links);
+            setWords(sent);
+            setHypertext(links);
         }
     }, [sentence]);
+
+    useEffect(() => {
+        console.log(hypertext);
+    }, [hypertext]);
 
     const [tag, setTag] = useState([]);
 
@@ -104,7 +112,8 @@ const Home = props => {
             tag,
             sentId,
             username,
-            date
+            date,
+            hypertext,
         };
         const res = await axios.post('/submit-sentence', {
             method: "POST",
@@ -175,6 +184,8 @@ const StyledGridder = styled.div`
     display: grid;
     grid-template-columns: 1fr 4fr;
     gap: 20px;
+    overflow-y: auto;
+    /* margin: */
 `;
 
 const StyledRightContainer = styled.div`
@@ -207,6 +218,7 @@ const StyledFlex = styled.div`
     gap: 6px;
     width: 75%;
     margin: 24px auto;
+    flex-wrap: wrap;
 `;
 
 const StyledWord = styled.div`
@@ -217,7 +229,7 @@ const StyledWord = styled.div`
     background-color: ${props => ((props.lang) === (props.individualTag)) ? '#71BC68' : '#B22B27'};
     cursor: pointer;
     display:flex;
-    flex: 1;
+    flex: 0 1 10%;
     justify-content: center;
 `;
 
@@ -234,6 +246,7 @@ const StyledSentenceContainer = styled.div`
     width: max-content;
     text-align: center;
     margin: 24px auto;
+    width: 90%;
 `;
 
 const StyledSubmitContainer = styled.div`

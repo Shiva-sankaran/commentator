@@ -212,6 +212,7 @@ const StyledFlex = styled.div`
     gap: 6px;
     width: 75%;
     margin: 24px auto;
+    flex-wrap: wrap;
 `;
 
 const StyledWord = styled.div`
@@ -222,7 +223,7 @@ const StyledWord = styled.div`
     background-color: ${props => ((props.lang) === (props.individualTag)) ? '#71BC68' : '#B22B27'};
     cursor: pointer;
     display:flex;
-    flex: 1;
+    flex: 0 1 10%;
     justify-content: center;
 `;
 
@@ -239,6 +240,7 @@ const StyledSentenceContainer = styled.div`
     width: max-content;
     text-align: center;
     margin: 24px auto;
+    width: 90%;
 `;
 
 const StyledSubmitContainer = styled.div`

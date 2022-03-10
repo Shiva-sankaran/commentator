@@ -59,6 +59,8 @@ const StyledNavbarContainer = styled.div`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+
+    z-index: 0;
 `;
 
 const StyledName = styled.p`

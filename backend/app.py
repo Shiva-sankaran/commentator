@@ -161,8 +161,9 @@ def submit_sentence():
     tag = requestdata['tag']
     username = requestdata['username']
     date = requestdata['date']
+    hypertext = requestdata['hypertext']
 
-    lst = [selected, date, tag]
+    lst = [selected, date, tag, hypertext]
     print(lst)
 
     print(sentId, selected, tag, username)
@@ -174,6 +175,24 @@ def submit_sentence():
 
     return jsonify({'result': 'Message Stored Successfully'})
 
+
+# @app.route('/tokenize-en', methods=['POST'])
+# # @is_logged_in
+# def tokenize_en():
+#     sentences_collection = database.get_collection('sentences')
+#     requestdata = json.loads(request.data)
+#     print(requestdata)
+#     requestdata = json.loads(requestdata['body'])
+
+#     sentId = requestdata['id']
+#     print(sentId)
+#     result = sentences_collection.find({'sid': sentId})
+#     data = list(result)
+#     data = data[0]
+#     sentence = data['sentence']
+#     print(sentence)
+
+#     return jsonify({'result': 'Message Stored Successfully'})
 
 @app.route('/submit-edit-sentence', methods=['POST'])
 # @is_logged_in
