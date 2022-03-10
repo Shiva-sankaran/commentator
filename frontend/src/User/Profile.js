@@ -13,9 +13,9 @@ const Profile = () => {
 
     const columns = [
         { field: 'id', headerName: "Sentence ID", width: 100 },
-        { field: 'date', headerName: "Date", width: 200 },
-        { field: 'sentence', headerName: "Sentence", width: 800 },
-        { field: 'grammar', headerName: "Grammar", width: 100 },
+        { field: 'date', headerName: "Date", width: 100 },
+        { field: 'sentence', headerName: "Sentence", width: 1000 },
+        // { field: 'grammar', headerName: "Grammar", width: 100 },
     ];
 
     const fetchAllSentences = async () => {
@@ -39,16 +39,24 @@ const Profile = () => {
 
         let rowArr = [];
         let sid = 1;
+
+        const dateFormtatter = d => {
+            return (
+                d.split('T')[0]
+            );
+        };
+
         result.map((elem) => {
             let sentence = "";
             console.log(elem[2]);
             elem[2].map(word => {sentence = sentence + word['key'] + " "})
             console.log(sentence);
+
             const row = {
                 id: sid,
-                date: elem[1],
+                date: dateFormtatter(elem[1]),
                 sentence: sentence,
-                grammar: elem[0]
+                // grammar: elem[0]
             };
             sid = sid + 1;
             console.log(row);
@@ -72,9 +80,8 @@ const Profile = () => {
                 {rows.length > 0 && (<DataGrid
                     rows={rows}
                     columns={columns}
-                    pageSize={5}
+                    pageSize={15}
                     rowsPerPageOptions={[5]}
-                    checkboxSelection
                     onRowClick={(param) => history(`/edit/${param.row.id}`)}
                 />)}      
             </StyledDataGridContainer>
