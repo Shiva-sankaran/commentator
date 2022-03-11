@@ -24,6 +24,8 @@ const Edit = props => {
     const history = useNavigate();
     const [sentence, setSentence] = useState('');
     const [sentId, setSentId] = useState(sid);
+    const [hypertext, setHypertext] = useState([]);
+
     console.log(sentId);
 
     useEffect(() => {
@@ -53,8 +55,11 @@ const Edit = props => {
     const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
         if(sentence.length > 0){
-            console.log(wordArr(sentence));
-            setWords(wordArr(sentence));
+            let {sent, links} = wordArr(sentence);
+            console.log(sent);
+            console.log(links);
+            setWords(sent);
+            setHypertext(links);
         }
     }, [sentence]);
 
@@ -108,7 +113,8 @@ const Edit = props => {
             tag,
             sentId,
             username,
-            date
+            date,
+            hypertext,
         };
         const res = await axios.post('/submit-edit-sentence', {
             method: "POST",

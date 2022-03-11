@@ -6,6 +6,7 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 import json
 from flask_cors import CORS, cross_origin
+import os
 
 app = Flask(__name__)
 
@@ -17,9 +18,8 @@ Session(app)
 sess = Session()
 sess.init_app(app)
 
+conn_str = os.environ.get("DATABASE_URL")
 
-# conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/test"
-conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 # set a 5-second connection timeout
 client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
 database = client['annotation_tool']
@@ -207,8 +207,10 @@ def submit_edit_sentence():
     tag = requestdata['tag']
     username = requestdata['username']
     date = requestdata['date']
+    hypertext = requestdata['hypertext']
 
-    lst = [selected, date, tag]
+    lst = [selected, date, tag, hypertext]
+
     print(lst)
 
     print(sentId, selected, tag, username)

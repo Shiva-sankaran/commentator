@@ -14,7 +14,7 @@ const Profile = () => {
     const columns = [
         { field: 'id', headerName: "Sentence ID", width: 100 },
         { field: 'date', headerName: "Date", width: 100 },
-        { field: 'sentence', headerName: "Sentence", width: 1000 },
+        { field: 'sentence', headerName: "Sentence", flex: 1 },
         // { field: 'grammar', headerName: "Grammar", width: 100 },
     ];
 
@@ -97,4 +97,5 @@ const StyledDataGridContainer = styled.div`
     /* padding: 24px; */
     margin: 32px auto;
     overflow-x: hidden;
+    cursor: pointer;
 `;

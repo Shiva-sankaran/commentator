@@ -21,16 +21,17 @@ sentences_collection = database.get_collection('sentences')
 df = pd.read_csv('data.csv')
 df = df['Sentence']
 
-rows = sentences_collection.find().sort('sid', pymongo.DESCENDING).limit(1)
-rows = list(rows)
-rows = rows[0]
-last_row_id = rows['sid']
+# rows = sentences_collection.find().sort('sid', pymongo.DESCENDING).limit(1)
+# rows = list(rows)
+# rows = rows[0]
+# last_row_id = rows['sid']
+last_row_id = 0
 print(last_row_id)
 
 # for sent in df:
 #     print(sent)
 
-for sent in range(5):
+for sent in range(len(df)):
     last_row_id += 1
 
     print(df[sent])
@@ -38,3 +39,5 @@ for sent in range(5):
         'sentence': df[sent],
         'sid': last_row_id
     })
+
+print('Task Finished')

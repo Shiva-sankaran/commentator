@@ -78,6 +78,8 @@ const Login = (props) => {
       <StyledButton variant="contained" onClick={onSubmitHandler}>
         Submit
       </StyledButton>
+
+      <StyledSignup onClick={() => history('/signup')}>Don't have an account? <StyledBlue>Sign Up</StyledBlue></StyledSignup>
     </StyledBox>
   );
 };
@@ -90,4 +92,20 @@ const StyledHeader = styled.p`
   margin: auto;
   width: 100%;
   color: #333;
+`;
+
+const StyledSignup = styled.div`
+  margin: auto;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+`;
+
+const StyledBlue = styled.div`
+  color: #0000D1;
+  margin-left: 4px;
+  text-decoration: underline;
 `;
