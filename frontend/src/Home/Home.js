@@ -23,6 +23,7 @@ const Home = props => {
     const [sentence, setSentence] = useState('');
     const [sentId, setSentId] = useState('');
     const [hypertext, setHypertext] = useState([]);
+    const [hashtags, setHashtags] = useState([]);
     useEffect(() => {
         const x = async () => {
             const dict = await FetchSentence();
@@ -50,11 +51,13 @@ const Home = props => {
     const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
         if(sentence.length > 0){
-            let {sent, links} = wordArr(sentence);
+            let {sent, links, hashs} = wordArr(sentence);
             console.log(sent);
             console.log(links);
+            console.log(hashs);
             setWords(sent);
             setHypertext(links);
+            setHashtags(hashs);
         }
     }, [sentence]);
 
@@ -84,6 +87,8 @@ const Home = props => {
             return 'e';
         }
         else if (letter === 'e'){
+            return 'u';
+        } else if(letter === 'u'){
             return 'h';
         }
     };
@@ -113,6 +118,7 @@ const Home = props => {
             sentId,
             username,
             date,
+            hashtags,
             hypertext,
         };
         const res = await axios.post('/submit-sentence', {
@@ -227,6 +233,7 @@ const StyledWord = styled.div`
     text-align: center;
 
     background-color: ${props => ((props.lang) === (props.individualTag)) ? '#71BC68' : '#B22B27'};
+    background-color: ${props => ((props.individualTag) === 'u') && '#b0b8ce'};
     cursor: pointer;
     display:flex;
     flex: 0 1 10%;

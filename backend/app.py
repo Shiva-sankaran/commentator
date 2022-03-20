@@ -1,3 +1,4 @@
+import sys
 import pymongo
 from flask import Flask, jsonify, render_template, request, json, session, send_from_directory
 from flask_session import Session
@@ -7,6 +8,7 @@ from functools import wraps
 import json
 from flask_cors import CORS, cross_origin
 import os
+import subprocess
 
 app = Flask(__name__)
 
@@ -140,12 +142,31 @@ def get_sentence():
     data = list(result)
     data = data[0]
     sentence = data['sentence']
+
+    # os.system("/LID_tool/getLanguage.py sampleinp.txt")
+    from LID_tool.getLanguage import langIdentify
+    lang = langIdentify('Shubh what kar rha hai?', 'classifiers/HiEn.classifier')
+    tags = []
+    print(lang)
+    for elem in lang:
+        inter = [elem[0]]
+        for i in range(1, len(elem)):
+            if elem[i] is '1':
+                inter.append(elem[i-1][0])
+        if len(inter) == 1:
+            inter.append('u')
+        tags.append(inter)
+
+
+
+    print('LANGUAGE TAG = ', tags)
+
     result = {
         'sentence': sentence,
         'sentId': sentId,
         'message': "Sentence Fetched Successfully."
     }
-    return jsonify({'result': result})
+    return jsonify({'result': result, 'tags': lang})
 
 
 @app.route('/submit-sentence', methods=['POST'])
@@ -155,6 +176,7 @@ def submit_sentence():
     requestdata = json.loads(request.data)
     print(requestdata)
     requestdata = json.loads(requestdata['body'])
+    print(requestdata)
 
     sentId = requestdata['sentId']
     selected = requestdata['selected']
@@ -162,8 +184,9 @@ def submit_sentence():
     username = requestdata['username']
     date = requestdata['date']
     hypertext = requestdata['hypertext']
+    hashtags = requestdata['hashtags']
 
-    lst = [selected, date, tag, hypertext]
+    lst = [selected, date, tag, hypertext, hashtags]
     print(lst)
 
     print(sentId, selected, tag, username)

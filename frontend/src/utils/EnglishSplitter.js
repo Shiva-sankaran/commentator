@@ -3,8 +3,20 @@ const detectURLs = (message) => {
   return message.match(urlRegex);
 }
 
+const detectHashtags = (message) => {
+  var hashRegex = /\B\#\w\w+\b/g
+  var result = message.match(hashRegex);
+  if (result) {
+      return result;
+  } else {
+      return false;
+  }
+}
+
 const EnglishSplitter = (sentence) => {
     // const sent = sentence.match(/\b(\w+)\b/g);
+    const hashs = detectHashtags(sentence) ? detectHashtags(sentence) : [];
+    console.log(hashs);
     const links = detectURLs(sentence) ? detectURLs(sentence) : [];
     console.log(links);
     let sent = sentence;
@@ -15,7 +27,7 @@ const EnglishSplitter = (sentence) => {
     console.log(sent)
     sent = sent.match(/\b([\w+^']+)\b/g)
     console.log(sent);
-    return {sent, links};
+    return {sent, links, hashs};
 };
 
 export default EnglishSplitter;
