@@ -50,7 +50,7 @@ sentTag = user[0]['sentTag']
 with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
     writer = csv.writer(f)
 
-    writer.writerow(['grammar', 'time', 'tag', 'link'])
+    writer.writerow(['grammar', 'time', 'tag', 'link', 'hashtag'])
 
     for sentence in sentTag:
     # print(sentence)
@@ -58,7 +58,8 @@ with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
         time = sentence[1]
         tag = sentence[2]
         link = sentence[3]
-        row = [grammar, time, tag, link]
+        hashtag = sentence[4] if sentence[4] else []
+        row = [grammar, time, tag, link, hashtag]
         # break
     # for i in data:
     #     data_row = i
@@ -66,4 +67,4 @@ with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
     #            data_row['sid'], data_row['stag']]
     #     print(row)
         writer.writerow(row)
-        break
+        # break

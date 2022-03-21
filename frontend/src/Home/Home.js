@@ -20,7 +20,7 @@ import Steps from '../Components/Steps';
 
 const Home = props => {
     const history = useNavigate();
-    const [sentence, setSentence] = useState('');
+    const [sentence, setSentence] = useState('Loading Sentence...');
     const [sentId, setSentId] = useState('');
     const [hypertext, setHypertext] = useState([]);
     const [hashtags, setHashtags] = useState([]);
@@ -68,14 +68,41 @@ const Home = props => {
     const [tag, setTag] = useState([]);
 
     useEffect(() => {
-        const lst = [];
-        let counter = 0;
-        words.map(elem => lst.push({
-            key: elem,
-            value: selected,
-            index: counter++,
-        }));
-        setTag(lst);
+        // const lst = [];
+        // let counter = 0;
+        // words.map(elem => lst.push({
+        //     key: elem,
+        //     value: selected,
+        //     index: counter++,
+        // }));
+        // setTag(lst);
+
+        const fetchLidData = async () => {
+            const data = {
+                sentence
+            };
+            const res = await axios.post('/get-lid-data', {
+                method: "POST",
+                headers: {
+                    'Content-type': 'application-json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                body: JSON.stringify(data)
+            });
+            console.log(res.data.result);
+            const resp = res.data.result;
+
+            const lst = [];
+            let counter = 0;
+            resp.map(elem => lst.push({
+                key: elem[0],
+                value: elem[1],
+                index: counter++,
+            }));
+            setTag(lst);
+        };
+        fetchLidData();
+
     }, [selected, words]);
 
     useEffect(() => {

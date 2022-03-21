@@ -144,8 +144,26 @@ def get_sentence():
     sentence = data['sentence']
 
     # os.system("/LID_tool/getLanguage.py sampleinp.txt")
+
+    result = {
+        'sentence': sentence,
+        'sentId': sentId,
+        'message': "Sentence Fetched Successfully."
+    }
+    return jsonify({'result': result})
+
+@app.route('/get-lid-data', methods=['POST'])
+def lid_tag():
     from LID_tool.getLanguage import langIdentify
-    lang = langIdentify('Shubh what kar rha hai?', 'classifiers/HiEn.classifier')
+
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    sentence = requestdata['sentence']
+    print('SENTENCE = ', sentence)
+
+    lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
     tags = []
     print(lang)
     for elem in lang:
@@ -158,16 +176,8 @@ def get_sentence():
         tags.append(inter)
 
 
-
     print('LANGUAGE TAG = ', tags)
-
-    result = {
-        'sentence': sentence,
-        'sentId': sentId,
-        'message': "Sentence Fetched Successfully."
-    }
-    return jsonify({'result': result, 'tags': lang})
-
+    return jsonify({'result': tags})
 
 @app.route('/submit-sentence', methods=['POST'])
 # @is_logged_in

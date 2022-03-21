@@ -14,7 +14,6 @@ const FetchSentence = async () => {
         body: JSON.stringify(data)
     });
     console.log(res.data.result);
-    console.log(res.data.tags);
     return res.data.result;
 };
 
