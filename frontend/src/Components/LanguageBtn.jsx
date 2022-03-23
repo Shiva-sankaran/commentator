@@ -27,7 +27,8 @@ const StyledEnBtn = styled.div`
     width: 100px;
     text-align: center;
 
-    background-color: ${props => props.lang === 'e' ? '#71BC68' : '#B22B27'};
+    background-color: ${props => props.lang === 'e' ? '#502380' : '#efefef'};
+    color: ${props => props.lang === 'e' ? '#efefef' : '#333'};
     cursor: pointer;
 `;
 
@@ -37,6 +38,7 @@ const StyledHiBtn = styled.div`
     width: 100px;
     text-align: center;
 
-    background-color: ${props => props.lang === 'h' ? '#71BC68' : '#B22B27'};
+    background-color: ${props => props.lang === 'h' ? '#502380' : '#efefef'};
+    color: ${props => props.lang === 'h' ? '#efefef' : '#333'};
     cursor: pointer;
 `;

@@ -6,9 +6,10 @@ const Steps = () => {
         <StyledContainer>
             <StyledHeader>Steps to Follow!</StyledHeader>
             <StyledSteps>1. Select Root Grammar for the sentence.</StyledSteps>
-            <StyledSteps>2. The selected grammar turns green.</StyledSteps>
-            <StyledSteps>3. Individual word tags get a default green color of the selected grammar.</StyledSteps>
-            <StyledSteps>4. Update individual word tags.</StyledSteps>
+            <StyledSteps>2. The selected grammar turns purple.</StyledSteps>
+            <StyledSteps>3. Individual word tags get a default color.</StyledSteps>
+            <StyledSteps>4. 'English' - green, 'Hindi' - red, 'Unidentified' - blue .</StyledSteps>
+            <StyledSteps>5. Update individual word tags.</StyledSteps>
         </StyledContainer>
     );
 };

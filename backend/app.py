@@ -20,7 +20,8 @@ Session(app)
 sess = Session()
 sess.init_app(app)
 
-conn_str = os.environ.get("DATABASE_URL")
+# conn_str = os.environ.get("DATABASE_URL")
+conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 
 # set a 5-second connection timeout
 client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)

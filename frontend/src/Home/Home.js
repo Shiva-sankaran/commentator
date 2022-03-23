@@ -259,7 +259,7 @@ const StyledWord = styled.div`
     padding: 8px 8px;
     text-align: center;
 
-    background-color: ${props => ((props.lang) === (props.individualTag)) ? '#71BC68' : '#B22B27'};
+    background-color: ${props => ((props.individualTag) === 'e') ? '#71BC68' : '#B22B27'};
     background-color: ${props => ((props.individualTag) === 'u') && '#b0b8ce'};
     cursor: pointer;
     display:flex;
