@@ -34,7 +34,8 @@ const Home = props => {
         x();
     }, []);
 
-    const [ selected, setSelected ] = useState('e');
+    const [ selected, setSelected ] = useState('');
+    const startTime = new Date();
 
     // const sentence = "Hi, this is Shubh. This is an Annotation tool.";
     // const sentence = "नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।";
@@ -139,6 +140,11 @@ const Home = props => {
     const onSubmitHandler = async () => {
         const username = JSON.parse(sessionStorage.getItem('annote_username'));
         const date = new Date();
+        const endTime = new Date();
+
+        const timeDifference = (endTime.getTime() - startTime.getTime()) / 1000;
+        console.log(timeDifference);
+
         const data = {
             selected,
             tag,
@@ -147,6 +153,7 @@ const Home = props => {
             date,
             hashtags,
             hypertext,
+            timeDifference,
         };
         const res = await axios.post('/submit-sentence', {
             method: "POST",
@@ -259,8 +266,8 @@ const StyledWord = styled.div`
     padding: 8px 8px;
     text-align: center;
 
-    background-color: ${props => ((props.individualTag) === 'e') ? '#71BC68' : '#B22B27'};
-    background-color: ${props => ((props.individualTag) === 'u') && '#b0b8ce'};
+    background-color: ${props => ((props.individualTag) === 'e') ? '#bbdfc8' : '#f3f2c9'};
+    background-color: ${props => ((props.individualTag) === 'u') && '#D4DCE9'};
     cursor: pointer;
     display:flex;
     flex: 0 1 10%;

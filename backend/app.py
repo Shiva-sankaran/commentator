@@ -196,8 +196,9 @@ def submit_sentence():
     date = requestdata['date']
     hypertext = requestdata['hypertext']
     hashtags = requestdata['hashtags']
+    timeDifference = requestdata['timeDifference']
 
-    lst = [selected, date, tag, hypertext, hashtags]
+    lst = [selected, date, tag, hypertext, hashtags, timeDifference]
     print(lst)
 
     print(sentId, selected, tag, username)
