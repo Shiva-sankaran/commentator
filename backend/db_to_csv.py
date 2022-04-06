@@ -53,7 +53,7 @@ with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
     writer.writerow(['grammar', 'time', 'tag', 'link', 'hashtag'])
 
     for sentence in sentTag:
-    # print(sentence)
+        # print(sentence)
         grammar = sentence[0]
         time = sentence[1]
         tag = sentence[2]

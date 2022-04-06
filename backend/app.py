@@ -153,6 +153,7 @@ def get_sentence():
     }
     return jsonify({'result': result})
 
+
 @app.route('/get-lid-data', methods=['POST'])
 def lid_tag():
     from LID_tool.getLanguage import langIdentify
@@ -176,9 +177,9 @@ def lid_tag():
             inter.append('u')
         tags.append(inter)
 
-
     print('LANGUAGE TAG = ', tags)
     return jsonify({'result': tags})
+
 
 @app.route('/submit-sentence', methods=['POST'])
 # @is_logged_in

@@ -25,6 +25,7 @@ const Edit = props => {
     const [sentence, setSentence] = useState('');
     const [sentId, setSentId] = useState(sid);
     const [hypertext, setHypertext] = useState([]);
+    const [hashtags, setHashtags] = useState([]);
 
     console.log(sentId);
 
@@ -38,7 +39,8 @@ const Edit = props => {
         x();
     }, []);
 
-    const [ selected, setSelected ] = useState('e');
+    const [ selected, setSelected ] = useState('');
+    const startTime = new Date();
 
     // const sentence = "Hi, this is Shubh. This is an Annotation tool.";
     // const sentence = "नमस्ते, यह शुभ है। यह एक एनोटेशन टूल है।";
@@ -55,25 +57,58 @@ const Edit = props => {
     const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
         if(sentence.length > 0){
-            let {sent, links} = wordArr(sentence);
+            let {sent, links, hashs} = wordArr(sentence);
             console.log(sent);
             console.log(links);
+            console.log(hashs);
             setWords(sent);
             setHypertext(links);
+            setHashtags(hashs);
         }
     }, [sentence]);
+
+    useEffect(() => {
+        console.log(hypertext);
+    }, [hypertext]);
 
     const [tag, setTag] = useState([]);
 
     useEffect(() => {
-        const lst = [];
-        let counter = 0;
-        words.map(elem => lst.push({
-            key: elem,
-            value: selected,
-            index: counter++,
-        }));
-        setTag(lst);
+        // const lst = [];
+        // let counter = 0;
+        // words.map(elem => lst.push({
+        //     key: elem,
+        //     value: selected,
+        //     index: counter++,
+        // }));
+        // setTag(lst);
+
+        const fetchLidData = async () => {
+            const data = {
+                sentence
+            };
+            const res = await axios.post('/get-lid-data', {
+                method: "POST",
+                headers: {
+                    'Content-type': 'application-json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+                body: JSON.stringify(data)
+            });
+            console.log(res.data.result);
+            const resp = res.data.result;
+
+            const lst = [];
+            let counter = 0;
+            resp.map(elem => lst.push({
+                key: elem[0],
+                value: elem[1],
+                index: counter++,
+            }));
+            setTag(lst);
+        };
+        fetchLidData();
+
     }, [selected, words]);
 
     useEffect(() => {
@@ -85,6 +120,8 @@ const Edit = props => {
             return 'e';
         }
         else if (letter === 'e'){
+            return 'u';
+        } else if(letter === 'u'){
             return 'h';
         }
     };
@@ -108,15 +145,22 @@ const Edit = props => {
     const onSubmitHandler = async () => {
         const username = JSON.parse(sessionStorage.getItem('annote_username'));
         const date = new Date();
+        const endTime = new Date();
+
+        const timeDifference = (endTime.getTime() - startTime.getTime()) / 1000;
+        console.log(timeDifference);
+
         const data = {
             selected,
             tag,
             sentId,
             username,
             date,
+            hashtags,
             hypertext,
+            timeDifference,
         };
-        const res = await axios.post('/submit-edit-sentence', {
+        const res = await axios.post('/submit-sentence', {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',
@@ -125,8 +169,6 @@ const Edit = props => {
             body: JSON.stringify(data)
         });
         console.log(res);
-        // sessionStorage.setItem('annote_sentId', sentId)
-        // window.location.reload();
         history('/profile');
     };
 
@@ -186,6 +228,8 @@ const StyledGridder = styled.div`
     display: grid;
     grid-template-columns: 1fr 4fr;
     gap: 20px;
+    overflow-y: auto;
+    /* margin: */
 `;
 
 const StyledRightContainer = styled.div`
@@ -226,7 +270,8 @@ const StyledWord = styled.div`
     padding: 8px 8px;
     text-align: center;
 
-    background-color: ${props => ((props.lang) === (props.individualTag)) ? '#71BC68' : '#B22B27'};
+    background-color: ${props => ((props.individualTag) === 'e') ? '#bbdfc8' : '#f3f2c9'};
+    background-color: ${props => ((props.individualTag) === 'u') && '#D4DCE9'};
     cursor: pointer;
     display:flex;
     flex: 0 1 10%;
