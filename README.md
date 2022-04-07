@@ -60,3 +60,17 @@ c. Create a csv file for the sentences present in the database.
 d. Modify database storage location
 
 > Update the <conn_str> present in backend/app.py to your mongoDB local or mongoDB atlas string.
+
+---
+
+### 4. Source Code
+
+> https://github.com/Shubh-Nisar/annotation-flask
+
+### 5. Contributors
+
+|                                                                                                                                           |                  |                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| <img  width="75"  alt="tn"  src="https://user-images.githubusercontent.com/65038837/126761822-ca949453-540f-40f1-a8cd-9a1ed3e4cae2.jpeg"> | Shubh Nisar      | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io) |
+| <img  width="75"  alt="vs"  src="">                                                                                                       | Vivek Srivastava | [`Some Link`](https://www.linkedin.com/)                         |
+| <img  width="75"  alt="ms"  src="">                                                                                                       | Mayank Singh     | [`Some Link`](https://www.linkedin.com/)                         |
