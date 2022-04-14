@@ -23,6 +23,7 @@ const Navbar = () => {
         sessionStorage.setItem('annote_user', false)
         sessionStorage.setItem('annote_username', "")
         sessionStorage.setItem('annote_sentId', 0)
+        sessionStorage.setItem('annote_admin', false)
         history('/login');
         // fetch('/signup', {
         //     method: 'POST',

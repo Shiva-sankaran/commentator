@@ -1,6 +1,6 @@
 import sys
 import pymongo
-from flask import Flask, jsonify, render_template, request, json, session, send_from_directory
+from flask import Flask, jsonify, redirect, render_template, request, json, session, send_from_directory
 from flask_session import Session
 
 from passlib.hash import sha256_crypt
@@ -20,6 +20,7 @@ Session(app)
 sess = Session()
 sess.init_app(app)
 
+frontend = 'http://localhost:3000'
 # conn_str = os.environ.get("DATABASE_URL")
 conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 
@@ -54,7 +55,7 @@ def register():
         return jsonify({"error_message": "The username has already been taken"})
     else:
         user_collection.insert_one(
-            {'username': username, 'password': password, 'sentId': 0, 'sentTag': []})
+            {'username': username, 'password': password, 'sentId': 0, 'admin': False, 'sentTag': []})
 
         result = {
             'username': username,
@@ -84,6 +85,7 @@ def login():
         data = res[0]
         print(data['password'])
         sentId = data['sentId']
+        admin = data['admin'] if data['admin'] else False
         print(sentId)
         print(sha256_crypt.verify(password, data['password']))
         # userID = data['id']
@@ -107,7 +109,8 @@ def login():
     returning = {
         # 'userId': session['user_id'],
         'username': session['username'],
-        'sentId': sentId
+        'sentId': sentId,
+        'admin': admin
     }
     return jsonify({'success': returning})
 
@@ -179,6 +182,29 @@ def lid_tag():
 
     print('LANGUAGE TAG = ', tags)
     return jsonify({'result': tags})
+
+
+@app.route('/admin-file-upload', methods=['POST'])
+def admin_file_upload():
+    # requestdata = json.loads(request.data)
+    # print(requestdata)
+    print(request.files['file'])
+    file = request.files['file']
+    file.save(os.path.join('uploads/{}'.format(file.filename)))
+    # requestdata = json.loads(requestdata['body'])
+
+    # file = requestdata['file']
+    # print('FILE = ', file)
+    os.system('db.py 1')
+
+    return redirect('{}/admin'.format(frontend))
+
+
+@app.route('/sentence-schema-creation', methods=['POST'])
+def sentence_schema_creation():
+    os.system('schemas.py 1')
+
+    return redirect('{}/admin'.format(frontend))
 
 
 @app.route('/submit-sentence', methods=['POST'])

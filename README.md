@@ -47,7 +47,7 @@ a. Define Schemas in the mongoDB database.
 
 b. Insert sentences in the defined database schema.
 
-    python db.py
+    python3 db.py
 
 ---
 

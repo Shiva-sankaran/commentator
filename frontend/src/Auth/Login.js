@@ -27,7 +27,7 @@ const Login = (props) => {
       body: JSON.stringify(data),
     });
     // const resFinal = await res;
-    // console.log(res.data.success.username)
+    // console.log(res.data.success.admin)
     res.data.success && sessionStorage.setItem("annote_user", true);
     res.data.success &&
       sessionStorage.setItem(
@@ -39,7 +39,18 @@ const Login = (props) => {
         "annote_sentId",
         JSON.stringify(res.data.success.sentId)
       );
-    (res.data.success) && history('/intermediate');
+
+    res.data.success &&
+    sessionStorage.setItem(
+      "annote_admin",
+      JSON.stringify(res.data.success.admin)
+    );
+      
+    if(res.data.success.admin){
+      (res.data.success) && history('/admin')
+    } else {
+      (res.data.success) && history('/intermediate');
+    }
     // fetch('/signup', {
     //     method: 'POST',
     //     headers: {
