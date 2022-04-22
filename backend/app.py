@@ -207,6 +207,18 @@ def sentence_schema_creation():
     return redirect('{}/admin'.format(frontend))
 
 
+@app.route('/csv-download', methods=['POST'])
+def csv_download():
+    from flask import send_file
+
+    username = request.form['username']
+    os.system('db_to_csv.py {}'.format(username))
+    return send_file('csv/data.csv', as_attachment=True)
+
+    # return redirect('{}/admin'.format(frontend))
+    return
+
+
 @app.route('/submit-sentence', methods=['POST'])
 # @is_logged_in
 def submit_sentence():

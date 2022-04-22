@@ -1,36 +1,6 @@
 import csv
-# import pymysql.cursors
-
-# connection = pymysql.connect(host='localhost',
-#                              user='root',
-#                              password='root',
-#                              database='annotation_sql',
-#                              cursorclass=pymysql.cursors.DictCursor)
-
-# cur = connection.cursor()
-# result = cur.execute("SELECT * FROM UserTagList WHERE uid = 1")
-# data = cur.fetchall()
-# print(data)
-# cur.close()
-
-
-# index = 0
-# with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
-#     writer = csv.writer(f)
-
-#     writer.writerow(['utid', 'uid', 'sid', 'stag'])
-#     for i in data:
-#         data_row = i
-#         row = [data_row['utid'], data_row['uid'],
-#                data_row['sid'], data_row['stag']]
-#         print(row)
-#         writer.writerow(row)
-
-
-from tokenize import group
-import pandas as pd
 import pymongo
-import os
+import sys
 
 # conn_str = os.environ.get('DATABASE_URL')
 conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
@@ -42,29 +12,28 @@ print(database.list_collection_names())
 
 users_collection = database.get_collection('users')
 
-user = users_collection.find({'username': 'test'})
-# user = users_collection.find()
+username = sys.argv[1]
+print('username = ', username)
+
+user = users_collection.find({'username': username})
 user = list(user)
+print(user)
 sentTag = user[0]['sentTag']
 
 with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
     writer = csv.writer(f)
 
-    writer.writerow(['grammar', 'time', 'tag', 'link', 'hashtag'])
+    writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time'])
 
     for sentence in sentTag:
         # print(sentence)
         grammar = sentence[0]
-        time = sentence[1]
+        date = sentence[1]
         tag = sentence[2]
         link = sentence[3]
         hashtag = sentence[4] if sentence[4] else []
-        row = [grammar, time, tag, link, hashtag]
-        # break
-    # for i in data:
-    #     data_row = i
-    #     row = [data_row['utid'], data_row['uid'],
-    #            data_row['sid'], data_row['stag']]
-    #     print(row)
+        time = sentence[5]
+        row = [grammar, date, tag, link, hashtag, time]
+
         writer.writerow(row)
         # break
