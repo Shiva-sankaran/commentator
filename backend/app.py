@@ -1,3 +1,4 @@
+import string
 import sys
 import pymongo
 from flask import Flask, jsonify, redirect, render_template, request, json, session, send_from_directory
@@ -207,16 +208,48 @@ def sentence_schema_creation():
     return redirect('{}/admin'.format(frontend))
 
 
+@app.route('/fetch-users-list', methods=['POST'])
+def fetch_users_list():
+    user_collection = database.get_collection('users')
+    user_list = user_collection.find({})
+    user_list = list(user_list)
+
+    users_list = []
+    for user in user_list:
+        users_list.append(user['username'])
+    print(users_list)
+    # user_list = list(user_collection)
+    # print(user_list)
+
+    return jsonify({'result': users_list})
+
+
 @app.route('/csv-download', methods=['POST'])
 def csv_download():
     from flask import send_file
 
-    username = request.form['username']
+    username = request.form.get('username')
     os.system('db_to_csv.py {}'.format(username))
     return send_file('csv/data.csv', as_attachment=True)
 
+    # print(username)
+    # return jsonify({'result': 'Done'})
+
     # return redirect('{}/admin'.format(frontend))
     return
+
+
+@app.route('/compare-annotators', methods=['POST'])
+def compare_annotators():
+    from flask import send_file
+
+    username1 = request.form.get('username1')
+    username2 = request.form.get('username2')
+    print(username1, username2)
+
+    # return jsonify({'result': 'true'})
+    os.system('compare.py {} {}'.format(username1, username2))
+    return send_file('csv/compare.csv', as_attachment=True)
 
 
 @app.route('/submit-sentence', methods=['POST'])
