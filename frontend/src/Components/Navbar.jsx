@@ -38,7 +38,7 @@ const Navbar = () => {
     };
     return (
         <StyledNavbarContainer>
-            <StyledName onClick={() => history('/')}>Annotex</StyledName>
+            <StyledName onClick={() => history('/')}>COMA</StyledName>
             <StyledFlex>
                 <StyledUsername onClick={() => history('/profile')} style={{ cursor: 'pointer' }}>{logged_in_user}</StyledUsername>
                 <StyledPowerOff onClick={logoutHandler}/>

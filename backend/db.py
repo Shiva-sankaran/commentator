@@ -1,5 +1,6 @@
 import pandas as pd
 import pymongo
+import sys
 # # conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/test"
 conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 # conn_str = "mongodb://localhost:27017"
@@ -10,9 +11,10 @@ database = client['annotation_tool']
 
 sentences_collection = database.get_collection('sentences')
 
-
-df = pd.read_csv('uploads/admin.csv')
-df = df['Sentence']
+filename = sys.argv[1]
+df = pd.read_csv('uploads/{}'.format(filename), header=None)
+df = df.iloc[:, 0]
+print(df)
 
 last_row_id = 0
 print(last_row_id)

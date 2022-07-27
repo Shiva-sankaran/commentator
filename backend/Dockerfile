@@ -14,4 +14,4 @@ ENV FLASK_APP=app.py
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 # CMD ["backend", "app.py"]
 
-EXPOSE 5000
+EXPOSE 5000/tcp

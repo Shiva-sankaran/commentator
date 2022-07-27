@@ -3,6 +3,7 @@ import sys
 import pymongo
 from flask import Flask, jsonify, redirect, render_template, request, json, session, send_from_directory
 from flask_session import Session
+import pandas as pd
 
 from passlib.hash import sha256_crypt
 from functools import wraps
@@ -14,7 +15,7 @@ import subprocess
 app = Flask(__name__)
 
 cors = CORS(app, resources={
-            r"/register": {"origins": "http://127.0.0.1:5000"}}, static_folder='../frontend/build')
+            r"/register": {"origins": "*"}}, static_folder='../frontend/build')
 app.config.from_pyfile('config.py')
 Session(app)
 
@@ -34,7 +35,13 @@ except Exception:
     print("Unable to connect to the server.")
 
 
-@app.route('/signup', methods=['POST'])
+@app.route('/test', methods=['GET'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def test():
+    return jsonify({'result': 'Hello World'})
+
+
+@app.route('/signup', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def register():
     user_collection = database.get_collection('users')
@@ -67,7 +74,7 @@ def register():
     # return jsonify({'result': requestdata})
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     user_collection = database.get_collection('users')
 
@@ -160,28 +167,33 @@ def get_sentence():
 
 @app.route('/get-lid-data', methods=['POST'])
 def lid_tag():
-    from LID_tool.getLanguage import langIdentify
+    # from LID_tool.getLanguage import langIdentify
 
     requestdata = json.loads(request.data)
     print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
-    sentence = requestdata['sentence']
-    print('SENTENCE = ', sentence)
+    sid = requestdata['sentId']
+    print('SENTENCE = ', sid)
 
-    lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
-    tags = []
-    print(lang)
-    for elem in lang:
-        inter = [elem[0]]
-        for i in range(1, len(elem)):
-            if elem[i] is '1':
-                inter.append(elem[i-1][0])
-        if len(inter) == 1:
-            inter.append('u')
-        tags.append(inter)
+    # lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
+    # tags = []
+    # print(lang)
+    # for elem in lang:
+    #     inter = [elem[0]]
+    #     for i in range(1, len(elem)):
+    #         if elem[i] is '1':
+    #             inter.append(elem[i-1][0])
+    #     if len(inter) == 1:
+    #         inter.append('u')
+    #     tags.append(inter)
 
-    print('LANGUAGE TAG = ', tags)
+    # print('LANGUAGE TAG = ', tags)
+    lid_collection = database.get_collection('lid')
+    prev = lid_collection.find()
+    prev = list(prev)
+    print(prev)
+    tags = prev[int(sid)-1]['tags']
     return jsonify({'result': tags})
 
 
@@ -191,20 +203,108 @@ def admin_file_upload():
     # print(requestdata)
     print(request.files['file'])
     file = request.files['file']
-    file.save(os.path.join('uploads/{}'.format(file.filename)))
+    file.save('uploads/{}'.format(file.filename))
     # requestdata = json.loads(requestdata['body'])
 
     # file = requestdata['file']
     # print('FILE = ', file)
-    os.system('db.py 1')
+    import pandas as pd
+    # os.system('db.py 1 {}'.format(file.filename))
+    sentences_collection = database.get_collection('sentences')
+
+    filename = file.filename
+    df = pd.read_csv('uploads/{}'.format(filename), header=None)
+    df = df.iloc[:, 0]
+    print(df)
+
+    last_row_id = 0
+    print(last_row_id)
+    prev = sentences_collection.find()
+    prev = list(prev)
+    if len(prev) > 0:
+        prev = prev[-1]
+        print(prev['sid'])
+        last_row_id = prev['sid']
+
+    for sent in range(len(df)):
+        last_row_id += 1
+
+        print(df[sent])
+        sentences_collection.insert_one({
+            'sentence': df[sent],
+            'sid': last_row_id
+        })
+
+    print('Task Finished')
+
+    # os.system('LID_execute.py 1 {}'.format(file.filename))
+    from LID_tool.getLanguage import langIdentify
+    lid_collection = database.get_collection('lid')
+
+    sentences_collection = database.get_collection('sentences')
+    prev_sent = sentences_collection.find()
+    prev_sent = list(prev_sent)
+    total_num_of_sent = len(prev_sent)
+
+    last_row_id = 0
+    print(last_row_id)
+    prev = lid_collection.find()
+    prev = list(prev)
+    if len(prev) > 0:
+        prev = prev[-1]
+        print(prev['tag_id'])
+        last_row_id = prev['tag_id']
+
+    sentence_details = prev_sent[last_row_id]
+    sentence = sentence_details['sentence']
+    start_index = sentence_details['sid']
+    print('SENTENCE = ', sentence)
+    print(total_num_of_sent)
+    print(prev_sent[start_index-1])
+
+    for i in range(start_index-1, total_num_of_sent):
+        sentence = prev_sent[i]['sentence']
+        lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
+        tags = []
+
+        print(lang)
+        for elem in lang:
+            inter = [elem[0]]
+            for i in range(1, len(elem)):
+                if elem[i] is '1':
+                    inter.append(elem[i-1][0])
+            if len(inter) == 1:
+                inter.append('u')
+            tags.append(inter)
+
+        print('LANGUAGE TAG = ', tags)
+        lid_collection.insert_one({
+            'tags': tags,
+            'tag_id': last_row_id + 1
+        })
+        last_row_id = last_row_id + 1
 
     return redirect('{}/admin'.format(frontend))
 
 
 @app.route('/sentence-schema-creation', methods=['POST'])
 def sentence_schema_creation():
-    os.system('schemas.py 1')
+    try:
+        database.create_collection('users')
+    except:
+        print("Already exists")
 
+    try:
+        database.create_collection('sentences')
+    except:
+        print("Already exists")
+
+    try:
+        database.create_collection('lid')
+    except:
+        print("Already exists")
+
+    print('Schemas Created')
     return redirect('{}/admin'.format(frontend))
 
 
@@ -229,7 +329,35 @@ def csv_download():
     from flask import send_file
 
     username = request.form.get('username')
-    os.system('db_to_csv.py {}'.format(username))
+    # os.system('db_to_csv.py {}'.format(username))
+    import csv
+    users_collection = database.get_collection('users')
+
+    print('username = ', username)
+
+    user = users_collection.find({'username': username})
+    user = list(user)
+    print(user)
+    sentTag = user[0]['sentTag']
+
+    with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
+        writer = csv.writer(f)
+
+        writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time'])
+
+        for sentence in sentTag:
+            # print(sentence)
+            grammar = sentence[0]
+            date = sentence[1]
+            tag = sentence[2]
+            link = sentence[3]
+            hashtag = sentence[4] if sentence[4] else []
+            time = sentence[5]
+            row = [grammar, date, tag, link, hashtag, time]
+
+            writer.writerow(row)
+            # break
+
     return send_file('csv/data.csv', as_attachment=True)
 
     # print(username)
@@ -248,7 +376,73 @@ def compare_annotators():
     print(username1, username2)
 
     # return jsonify({'result': 'true'})
-    os.system('compare.py {} {}'.format(username1, username2))
+    # os.system('compare.py {} {}'.format(username1, username2))
+    import csv
+    username1_name = username1
+    username2_name = username2
+    print('username1 = ', username1_name)
+    print('username2 = ', username2_name)
+
+    user_collection = database.get_collection('users')
+    username1 = user_collection.find({'username': username1_name})
+    username2 = user_collection.find({'username': username2_name})
+
+    user1 = list(username1)
+    user2 = list(username2)
+
+    print('USER 1 = ', user1)
+    print('USER 2 = ', user2)
+
+    counter = min(user1[0]['sentId'], user2[0]['sentId'])
+    print(counter)
+
+    sentTag1 = user1[0]['sentTag']
+    sentTag2 = user2[0]['sentTag']
+
+    with open('./csv/compare.csv', 'w', encoding='utf-8', newline="") as f:
+        writer = csv.writer(f)
+
+        writer.writerow(['grammar_{}'.format(username1_name), 'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '', 'grammar_{}'.format(username2_name), 'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 'hashtag_{}'.format(username2_name),
+                        'time_{}'.format(username2_name), '', 'grammer_same', 'words_with_similar_annotation', 'total_words', 'Similarity Index'])
+
+        for count in reversed(range(counter)):
+            # print(sentence)
+            grammar_1 = sentTag1[count][0]
+            date_1 = sentTag1[count][1]
+            tag_1 = sentTag1[count][2]
+            link_1 = sentTag1[count][3]
+            hashtag_1 = sentTag1[count][4] if sentTag1[count][4] else []
+            time_1 = sentTag1[count][5]
+
+            empty = ''
+
+            grammar_2 = sentTag2[count][0]
+            date_2 = sentTag2[count][1]
+            tag_2 = sentTag2[count][2]
+            link_2 = sentTag2[count][3]
+            hashtag_2 = sentTag2[count][4] if sentTag2[count][4] else []
+            time_2 = sentTag2[count][5]
+
+            grammer_same = 0
+            if grammar_1 == grammar_2:
+                grammer_same = 1
+
+            words_with_similar_annotation = 0
+            total_words = 0
+            for index in range(len(tag_1)):
+                if tag_1[index]['value'] == tag_2[index]['value']:
+                    words_with_similar_annotation += 1
+                total_words += 1
+
+            similar_to_total_ratio = words_with_similar_annotation / total_words
+
+            row = [grammar_1, date_1, tag_1, link_1, hashtag_1, time_1,
+                   empty, grammar_2, date_2, tag_2, link_2, hashtag_2, time_2, empty, grammer_same, words_with_similar_annotation, total_words, similar_to_total_ratio]
+
+            writer.writerow(row)
+            counter -= 1
+            # break
+
     return send_file('csv/compare.csv', as_attachment=True)
 
 
@@ -360,4 +554,4 @@ def all_sentence():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
