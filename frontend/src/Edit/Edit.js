@@ -85,7 +85,7 @@ const Edit = props => {
 
         const fetchLidData = async () => {
             const data = {
-                sentence
+                sentId
             };
             const res = await axios.post('/get-lid-data', {
                 method: "POST",
