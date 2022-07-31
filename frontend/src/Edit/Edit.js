@@ -28,6 +28,11 @@ const Edit = props => {
     const [hashtags, setHashtags] = useState([]);
 
     console.log(sentId);
+    const logged_in_user = JSON.parse(sessionStorage.getItem('annote_username'));
+
+    // useEffect(() => {
+    //     getSentence(sid);
+    // }, []);
 
     useEffect(() => {
         const x = async () => {
@@ -54,14 +59,12 @@ const Edit = props => {
             return (HindiSplitter(sent));
         }
     };
-    const [words, setWords] = useState(sentence.length > 0 ? wordArr(sentence) : wordArr(""));
     useEffect(() => {
         if(sentence.length > 0){
             let {sent, links, hashs} = wordArr(sentence);
             console.log(sent);
             console.log(links);
             console.log(hashs);
-            setWords(sent);
             setHypertext(links);
             setHashtags(hashs);
         }
@@ -71,23 +74,17 @@ const Edit = props => {
         console.log(hypertext);
     }, [hypertext]);
 
-    const [tag, setTag] = useState([]);
+    const [tag, setTag] = useState([{index: 0, key: 'Hello', value: 'e'}]);
 
     useEffect(() => {
-        // const lst = [];
-        // let counter = 0;
-        // words.map(elem => lst.push({
-        //     key: elem,
-        //     value: selected,
-        //     index: counter++,
-        // }));
-        // setTag(lst);
-
-        const fetchLidData = async () => {
+        let resp;
+        const getSentence = async (id_prop) => {
+            const id = JSON.parse(id_prop);
             const data = {
-                sentId
+                id,
+                logged_in_user,
             };
-            const res = await axios.post('/get-lid-data', {
+            const res = await axios.post('/get-edit-sentence', {
                 method: "POST",
                 headers: {
                     'Content-type': 'application-json',
@@ -95,8 +92,25 @@ const Edit = props => {
                 },
                 body: JSON.stringify(data)
             });
-            console.log(res.data.result);
-            const resp = res.data.result;
+            // console.log(res.data.result);
+            resp = res.data.result[2];
+            setSelected(res.data.result[0]);
+
+            console.log(resp);
+
+            // const lst = [];
+            // let counter = 0;
+            // resp.map(elem => lst.push({
+            //     key: elem[0],
+            //     value: elem[1],
+            //     index: counter++,
+            // }));
+            setTag(resp);
+            // return res.data.result;
+        };
+
+        const fetchLidData = async () => {
+            console.log(resp)
 
             const lst = [];
             let counter = 0;
@@ -107,9 +121,9 @@ const Edit = props => {
             }));
             setTag(lst);
         };
-        fetchLidData();
-
-    }, [selected, words]);
+        // fetchLidData();
+        getSentence(sid);
+    }, []);
 
     useEffect(() => {
         console.log(selected);
@@ -160,7 +174,7 @@ const Edit = props => {
             hypertext,
             timeDifference,
         };
-        const res = await axios.post('/submit-sentence', {
+        const res = await axios.post('/submit-edit-sentence', {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',
@@ -194,7 +208,7 @@ const Edit = props => {
                             Individual Word Tags
                         </StyledWordBreakup>
                         <StyledFlex>
-                            {tag.map(elem => {
+                            {tag && tag.map(elem => {
                                 console.log(selected, elem.value, selected === (elem.value));
                                 return (
                                     <StyledWord 

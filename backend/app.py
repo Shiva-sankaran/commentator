@@ -329,36 +329,115 @@ def csv_download():
     from flask import send_file
 
     username = request.form.get('username')
+    cmi = request.form.get('cmi')
     # os.system('db_to_csv.py {}'.format(username))
     import csv
     users_collection = database.get_collection('users')
 
     print('username = ', username)
+    if(username != 'ALL'):
+        user = users_collection.find({'username': username})
+        user = list(user)
+        print(user)
+        sentTag = user[0]['sentTag']
 
-    user = users_collection.find({'username': username})
-    user = list(user)
-    print(user)
-    sentTag = user[0]['sentTag']
+        with open('./csv/{}.csv'.format(username), 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
 
-    with open('./csv/data.csv', 'w', encoding='utf-8', newline="") as f:
-        writer = csv.writer(f)
+            writer.writerow(['grammar', 'date', 'tag', 'link',
+                            'hashtag', 'time', 'CMI Score'])
 
-        writer.writerow(['grammar', 'date', 'tag', 'link', 'hashtag', 'time'])
+            for sentence in sentTag:
+                # print(sentence)
+                grammar = sentence[0]
+                date = sentence[1]
+                tag = sentence[2]
+                link = sentence[3]
+                hashtag = sentence[4] if sentence[4] else []
+                time = sentence[5]
+                row = [grammar, date, tag, link, hashtag, time]
 
-        for sentence in sentTag:
-            # print(sentence)
-            grammar = sentence[0]
-            date = sentence[1]
-            tag = sentence[2]
-            link = sentence[3]
-            hashtag = sentence[4] if sentence[4] else []
-            time = sentence[5]
-            row = [grammar, date, tag, link, hashtag, time]
+                en_count = 0
+                hi_count = 0
+                token_count = 0
+                lang_ind_count = 0
 
-            writer.writerow(row)
-            # break
+                for i in range(len(tag)):
+                    if(tag[i]['value'] == 'e'):
+                        en_count += 1
+                    elif(tag[i]['value'] == 'h'):
+                        hi_count += 1
+                    elif(tag[i]['value'] == 'u'):
+                        lang_ind_count += 1
+                    token_count += 1
 
-    return send_file('csv/data.csv', as_attachment=True)
+                max_w = max(en_count, hi_count)
+
+                cmi_score = 0
+                if(token_count > lang_ind_count):
+                    cmi_score = 100 * \
+                        (1 - (max_w / (token_count - lang_ind_count)))
+                else:
+                    cmi_score = 0
+
+                if(cmi_score >= float(cmi)):
+                    row.append(cmi_score)
+                    writer.writerow(row)
+                # break
+
+        return send_file('csv/{}.csv'.format(username), as_attachment=True)
+    else:
+        user = users_collection.find()
+        user = list(user)
+        print(username['username'] for username in user)
+        with open('./csv/all.csv', 'w', encoding='utf-8', newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(['User', 'grammar', 'date', 'tag', 'link',
+                                     'hashtag', 'time', 'CMI Score'])
+
+            for single_user in user:
+                sentTag = single_user['sentTag']
+                for sentence in sentTag:
+                    # print(sentence)
+                    grammar = sentence[0]
+                    date = sentence[1]
+                    tag = sentence[2]
+                    link = sentence[3]
+                    hashtag = sentence[4] if sentence[4] else []
+                    time = sentence[5]
+                    row = [single_user['username'], grammar, date,
+                           tag, link, hashtag, time]
+
+                    en_count = 0
+                    hi_count = 0
+                    token_count = 0
+                    lang_ind_count = 0
+
+                    for i in range(len(tag)):
+                        if(tag[i]['value'] == 'e'):
+                            en_count += 1
+                        elif(tag[i]['value'] == 'h'):
+                            hi_count += 1
+                        elif(tag[i]['value'] == 'u'):
+                            lang_ind_count += 1
+                        token_count += 1
+
+                    max_w = max(en_count, hi_count)
+
+                    cmi_score = 0
+                    if(token_count > lang_ind_count):
+                        cmi_score = 100 * \
+                            (1 - (max_w / (token_count - lang_ind_count)))
+                    else:
+                        cmi_score = 0
+
+                    if(cmi_score >= float(cmi)):
+                        row.append(cmi_score)
+                        if(single_user['admin'] is False):
+                            writer.writerow(row)
+                    # break
+
+        return send_file('csv/{}.csv'.format(username), as_attachment=True)
 
     # print(username)
     # return jsonify({'result': 'Done'})
@@ -373,7 +452,8 @@ def compare_annotators():
 
     username1 = request.form.get('username1')
     username2 = request.form.get('username2')
-    print(username1, username2)
+    kappa = request.form.get('kappa')
+    print(username1, username2, kappa)
 
     # return jsonify({'result': 'true'})
     # os.system('compare.py {} {}'.format(username1, username2))
@@ -393,7 +473,7 @@ def compare_annotators():
     print('USER 1 = ', user1)
     print('USER 2 = ', user2)
 
-    counter = min(user1[0]['sentId'], user2[0]['sentId'])
+    counter = min(int(user1[0]['sentId']), int(user2[0]['sentId']))
     print(counter)
 
     sentTag1 = user1[0]['sentTag']
@@ -403,7 +483,7 @@ def compare_annotators():
         writer = csv.writer(f)
 
         writer.writerow(['grammar_{}'.format(username1_name), 'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '', 'grammar_{}'.format(username2_name), 'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 'hashtag_{}'.format(username2_name),
-                        'time_{}'.format(username2_name), '', 'grammer_same', 'words_with_similar_annotation', 'total_words', 'Similarity Index'])
+                        'time_{}'.format(username2_name), '', 'grammer_same', 'words_with_similar_annotation', 'total_words', 'Cohen Kappa Score'])
 
         for count in reversed(range(counter)):
             # print(sentence)
@@ -434,15 +514,22 @@ def compare_annotators():
                     words_with_similar_annotation += 1
                 total_words += 1
 
-            similar_to_total_ratio = words_with_similar_annotation / total_words
+            from sklearn.metrics import cohen_kappa_score
+            ann1_tags = [elem['value'] for elem in tag_1]
+            ann2_tags = [elem['value'] for elem in tag_2]
+            kappa_score = cohen_kappa_score(
+                ann1_tags, ann2_tags, labels=None, weights=None)
 
             row = [grammar_1, date_1, tag_1, link_1, hashtag_1, time_1,
-                   empty, grammar_2, date_2, tag_2, link_2, hashtag_2, time_2, empty, grammer_same, words_with_similar_annotation, total_words, similar_to_total_ratio]
+                   empty, grammar_2, date_2, tag_2, link_2, hashtag_2, time_2, empty, grammer_same, words_with_similar_annotation, total_words, kappa_score]
 
-            writer.writerow(row)
+            print(kappa_score, type(kappa_score))
+            if(float(str(kappa_score)) >= float(kappa)):
+                writer.writerow(row)
             counter -= 1
             # break
 
+    # return 'Good'
     return send_file('csv/compare.csv', as_attachment=True)
 
 
@@ -495,6 +582,29 @@ def submit_sentence():
 
 #     return jsonify({'result': 'Message Stored Successfully'})
 
+@app.route('/get-edit-sentence', methods=['POST'])
+# @is_logged_in
+def get_edit_sentence():
+    user_collection = database.get_collection('users')
+    requestdata = json.loads(request.data)
+    print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    sentId = requestdata['id']
+    username = requestdata['logged_in_user']
+
+    user = user_collection.find({'username': username})
+    user = list(user)
+    user = user[0]
+    userTags = user['sentTag'][sentId-1]
+
+    # user_collection.update_one({'username': username}, {
+    #     '$set': {'sentTag[{sentId}]'.format(sentId=sentId-1): lst},
+    # })
+
+    return jsonify({'result': userTags})
+
+
 @app.route('/submit-edit-sentence', methods=['POST'])
 # @is_logged_in
 def submit_edit_sentence():
@@ -509,8 +619,10 @@ def submit_edit_sentence():
     username = requestdata['username']
     date = requestdata['date']
     hypertext = requestdata['hypertext']
+    hashtags = requestdata['hashtags']
+    timeDifference = requestdata['timeDifference']
 
-    lst = [selected, date, tag, hypertext]
+    lst = [selected, date, tag, hypertext, hashtags, timeDifference]
 
     print(lst)
 

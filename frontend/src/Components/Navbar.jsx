@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = () => {
     const history = useNavigate();
     const logged_in_user = JSON.parse(sessionStorage.getItem('annote_username'));
+    const logged_in_admin = JSON.parse(sessionStorage.getItem('annote_admin'));
     const logoutHandler = async () => {
 
         const res = await axios.post('/logout', {
@@ -38,9 +39,13 @@ const Navbar = () => {
     };
     return (
         <StyledNavbarContainer>
-            <StyledName onClick={() => history('/')}>COMA</StyledName>
+            <StyledName onClick={() => history('/')}>COMMENTATOR</StyledName>
             <StyledFlex>
-                <StyledUsername onClick={() => history('/profile')} style={{ cursor: 'pointer' }}>{logged_in_user}</StyledUsername>
+                    {logged_in_admin && (<StyledForm method="POST" action="/sentence-schema-creation" enctype="multipart/form-data" >
+                        <StyledButton type="submit">Create Schemas</StyledButton>
+                    </StyledForm>)}
+                {!logged_in_admin && (<StyledUsername onClick={() => history('/profile')} style={{ cursor: 'pointer' }}>Edit Annotations</StyledUsername>)}
+                <StyledUsername style={{ borderColor: 'transparent' }}>{logged_in_user}</StyledUsername>
                 <StyledPowerOff onClick={logoutHandler}/>
             </StyledFlex>
         </StyledNavbarContainer>
@@ -48,6 +53,21 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+const StyledButton = styled.button`
+    /* border-radius: 8px;
+    padding: 6px 16px;
+    /* width: 65px; */
+    height: 40px;
+    border: none;
+    all: unset;
+    background-color: transparent;
+    color: #efefef;
+    border-bottom: 1px solid #efefef;
+    padding-bottom: 6px;
+    cursor: pointer;
+`;
+
 
 const StyledNavbarContainer = styled.div`
     position: fixed;
@@ -89,4 +109,8 @@ const StyledUsername = styled.div`
     color: #efefef;
     border-bottom: 1px solid #efefef;
     padding-bottom: 6px;
+`;
+
+const StyledForm = styled.form`
+    cursor: pointer;
 `;

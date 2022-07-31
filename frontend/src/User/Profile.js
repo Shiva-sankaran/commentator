@@ -14,7 +14,21 @@ const Profile = () => {
     const columns = [
         { field: 'id', headerName: "Sentence ID", width: 100 },
         { field: 'date', headerName: "Date", width: 100 },
-        { field: 'sentence', headerName: "Sentence", flex: 1 },
+        { field: 'sentence', headerName: "Sentence", flex: 1, renderCell: (params) => {
+            const {row} = params;
+            const tagArray = row['sentence'];
+            if(tagArray !=='Dummy Sentence'){
+                return (<StyledFlexer>
+                    {tagArray && tagArray.map(elem => {
+                        return (
+                            <StyledWord tokenTag={elem['value']}>{elem['key']}</StyledWord>
+                        );
+                    })}
+                </StyledFlexer>); 
+            } else {
+                return ("Dummy Sentence");
+            }
+        }},
         // { field: 'grammar', headerName: "Grammar", width: 100 },
     ];
 
@@ -48,14 +62,14 @@ const Profile = () => {
 
         result.map((elem) => {
             let sentence = "";
-            console.log(elem[2]);
+            console.log(elem);
             elem[2].map(word => {sentence = sentence + word['key'] + " "})
             console.log(sentence);
 
             const row = {
                 id: sid,
                 date: dateFormtatter(elem[1]),
-                sentence: sentence,
+                sentence: elem[2],
                 // grammar: elem[0]
             };
             sid = sid + 1;
@@ -98,4 +112,27 @@ const StyledDataGridContainer = styled.div`
     margin: 32px auto;
     overflow-x: hidden;
     cursor: pointer;
+`;
+
+const StyledWord = styled.div`
+    border-radius: 8px;
+    padding: 8px 8px;
+    text-align: center;
+
+    display:flex;
+    flex: 0 1 10%;
+    justify-content: center;
+
+    background-color: ${props => props.tokenTag === 'e' && '#bbdfc8'};
+    background-color: ${props => props.tokenTag ==='h' && '#f3f2c9'};
+    background-color: ${props => props.tokenTag === 'u' && '#D4DCE9'};
+`;
+
+const StyledFlexer = styled.div`
+    display:flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
 `;

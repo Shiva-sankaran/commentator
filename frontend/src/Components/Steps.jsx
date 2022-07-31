@@ -5,7 +5,7 @@ const Steps = () => {
     return (
         <StyledContainer>
             <StyledHeader>Steps to Follow!</StyledHeader>
-            <StyledSteps>1. Select Root Grammar for the sentence.</StyledSteps>
+            <StyledSteps>1. Select Matrix Language for the sentence.</StyledSteps>
             <StyledSteps>2. The selected grammar turns purple.</StyledSteps>
             <StyledSteps>3. Individual word tags get a default color.</StyledSteps>
             <StyledSteps>4. 'English' - green, 'Hindi' - yellow, 'Unidentified' - blue .</StyledSteps>

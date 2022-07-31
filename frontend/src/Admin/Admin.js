@@ -6,6 +6,8 @@ import styled from 'styled-components';
 // Components
 import Navbar from '../Components/Navbar';
 
+import { TextField } from '@mui/material';
+
 const Admin = () => {
     const history = useNavigate();
     const [file, setFile] = useState();
@@ -15,6 +17,8 @@ const Admin = () => {
     }, [file]);
 
     const [ userList, setUserList ] = useState([]);
+    const [kappa, setKappa] = useState(0);
+    const [cmi, setCmi] = useState(0);
 
     useEffect(() => {
         const fetchUsernames = async () => {
@@ -42,13 +46,16 @@ const Admin = () => {
                     <StyledButton style={styledButton} type="submit">Submit</StyledButton>
                 </form>
 
-                <StyledForm method="POST" action="/sentence-schema-creation" enctype="multipart/form-data" >
+                {/* <StyledForm method="POST" action="/sentence-schema-creation" enctype="multipart/form-data" >
                     <StyledButton style={styledButton} type="submit">Create Schemas</StyledButton>
-                </StyledForm>
+                </StyledForm> */}
 
                 <StyledForm method="POST" action="/csv-download" enctype="multipart/form-data" >
                     <StyledTextInput type="text" name="username" placeholder='Enter username'>
                         {/* <option>opt</option> */}
+                        <option value="ALL" name="option_tag" selected>
+                                    ALL
+                        </option>
                         {userList.map(elem => {
                             return (
                                 <option value={elem} name="option_tag">
@@ -57,6 +64,14 @@ const Admin = () => {
                             )
                         })}
                     </StyledTextInput>
+                    <StyledKappa
+                        name="cmi"
+                        type='text'
+                        placeholder='Enter CMI Threshold'
+                        onChange={(e) => setCmi(e.target.value)}
+                        required={true}
+                        style={{ marginLeft: 12, marginRight: 12 }}
+                    />
                     <StyledButton style={styledButton} type="submit">Download csv</StyledButton>
                 </StyledForm>
             </StyledFlexContainer>
@@ -84,6 +99,14 @@ const Admin = () => {
                             )
                         })}
                     </StyledTextInput>
+
+                    <StyledKappa
+                        name="kappa"
+                        type='text'
+                        placeholder='Enter Kappa Threshold'
+                        onChange={(e) => setKappa(e.target.value)}
+                        required={true}
+                    />
                 </StyledFlexRow>
                 <StyledButton style={styledButton} type="submit">Download Comparison csv</StyledButton>
             </StyledCompareForm>
@@ -118,11 +141,20 @@ const StyledFlexContainer = styled.div`
 `;
 
 const StyledTextInput = styled.select`
-    padding: 10px 8px;
+    padding: 12px 8px;
     color: black;
     border: 2px solid #efefef;
     border-radius: 4px;
     width: 200px;
+`;
+
+const StyledKappa = styled.input`
+    padding: 0px 8px !important;
+    color: black !important;
+    border: 2px solid #efefef !important;
+    border-radius: 4px !important;
+    width: 200px !important;
+    height: 40.8px !important;
 `;
 
 const StyledButton = styled.button`
