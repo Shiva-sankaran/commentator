@@ -12,6 +12,8 @@ Youtube Demo: [`https://youtu.be/pFqcwyjAfB4`](https://youtu.be/pFqcwyjAfB4)
 
 Live Demo Site: [`http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/`](http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/)
 
+Drive: [`https://drive.google.com/drive/commentator`](https://drive.google.com/drive/folders/1f5TpFEQiadBCGhvNDXgKpOQg7x3OvT88?usp=sharing)
+
 ---
 
 ### 2. Folder Structure
@@ -21,6 +23,7 @@ backend
 	app.py
 	requirements.txt
 	Dockerfile
+	LID_tool
 fronend
 	build
 	node_module
@@ -82,7 +85,12 @@ d. Updating MongoDB URL
 
     conn_str = YOUR_MONGODB_URL
 
-e. Running the local server
+e. Download LID Code from the google drive link attached above
+
+> Navigate to Drive > Downloads > LID & download the zip file
+> Extract zip file in LID_tool folder
+
+f. Running the local server
 
     python app.py
     OR
@@ -191,3 +199,10 @@ The updated frontend URL is available at Properties > Static Web Hosting
 | <img  width="75"  alt="tn"  src="https://user-images.githubusercontent.com/65038837/126761822-ca949453-540f-40f1-a8cd-9a1ed3e4cae2.jpeg"> | Shubh Nisar      | [`https://shubh-nisar.github.io`](https://shubh-nisar.github.io)               |
 | <img  width="75"  alt="vs"  src="">                                                                                                       | Vivek Srivastava | [`https://sites.google.com/view/vivek-srivastava/`](https://www.linkedin.com/) |
 | <img  width="75"  alt="ms"  src="">                                                                                                       | Mayank Singh     | [`https://mayank4490.github.io/`](https://mayank4490.github.io/)               |
+
+### 10. Mentions
+
+- https://github.com/microsoft/LID-tool
+- https://fasttext.cc/
+- https://pypi.org/project/langdetect/
+- https://github.com/google/cld3
