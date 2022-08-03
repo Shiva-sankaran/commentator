@@ -18,7 +18,7 @@ const Login = (props) => {
       username,
       password,
     };
-    const res = await axios.post("/login", {
+    const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/login`, {
       method: "POST",
       headers: {
         "Content-type": "application-json",
@@ -64,34 +64,37 @@ const Login = (props) => {
   };
 
   return (
-    <StyledBox
-      component="form"
-      sx={{
-        "& > :not(style)": { m: 1 },
-      }}
-      noValidate
-      autoComplete="off"
-    >
-      <StyledHeader>Login</StyledHeader>
-      <StyledTextField
-        id="login_username"
-        label="username"
-        variant="outlined"
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <StyledTextField
-        id="login_password"
-        label="password"
-        variant="outlined"
-        onChange={(e) => setPassword(e.target.value)}
-        type="password"
-      />
-      <StyledButton variant="contained" onClick={onSubmitHandler}>
-        Submit
-      </StyledButton>
+    <div>
+      <StyledTitle>Commentator: A Code-mixed Multilingual Text Annotation Framework</StyledTitle>
+      <StyledBox
+        component="form"
+        sx={{
+          "& > :not(style)": { m: 1 },
+        }}
+        noValidate
+        autoComplete="off"
+      >
+        <StyledHeader>Login</StyledHeader>
+        <StyledTextField
+          id="login_username"
+          label="username"
+          variant="outlined"
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <StyledTextField
+          id="login_password"
+          label="password"
+          variant="outlined"
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+        />
+        <StyledButton variant="contained" onClick={onSubmitHandler}>
+          Submit
+        </StyledButton>
 
-      <StyledSignup onClick={() => history('/signup')}>Don't have an account? <StyledBlue>Sign Up</StyledBlue></StyledSignup>
-    </StyledBox>
+        <StyledSignup onClick={() => history('/signup')}>Don't have an account? <StyledBlue>Sign Up</StyledBlue></StyledSignup>
+      </StyledBox>
+    </div>
   );
 };
 
@@ -103,6 +106,15 @@ const StyledHeader = styled.p`
   margin: auto;
   width: 100%;
   color: #333;
+`;
+
+const StyledTitle = styled.div`
+  font-size: 30px;
+  text-align: center;
+  margin: auto;
+  width: 100%;
+  color: #333;
+  margin-bottom: 50px;
 `;
 
 const StyledSignup = styled.div`

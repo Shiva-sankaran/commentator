@@ -82,7 +82,7 @@ const Home = props => {
             const data = {
                 sentId
             };
-            const res = await axios.post('/get-lid-data', {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/get-lid-data`, {
                 method: "POST",
                 headers: {
                     'Content-type': 'application-json',
@@ -155,7 +155,7 @@ const Home = props => {
             hypertext,
             timeDifference,
         };
-        const res = await axios.post('/submit-sentence', {
+        const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/submit-sentence`, {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',

@@ -22,7 +22,7 @@ const Admin = () => {
 
     useEffect(() => {
         const fetchUsernames = async () => {
-            const res = await axios.post('/fetch-users-list', {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/fetch-users-list`, {
                 method: "POST",
                 headers: {
                     'Content-type': 'application-json',
@@ -36,12 +36,15 @@ const Admin = () => {
         fetchUsernames();
     }, []);
 
+    const adminFileUpload = process.env.REACT_APP_BACKEND_URL + '/admin-file-upload'
+    const csvDownload = process.env.REACT_APP_BACKEND_URL + '/csv-download'
+    const compareAnnotators = process.env.REACT_APP_BACKEND_URL + '/compare-annotators'
     
     return (
         <div>
             <Navbar />
             <StyledFlexContainer>
-                <form style={styledForm} method="POST" action="/admin-file-upload" enctype="multipart/form-data" >
+                <form style={styledForm} method="POST" action={adminFileUpload} enctype="multipart/form-data" >
                     <input type='file' name="file" onChange={e => setFile(e.target.files[0])}/>
                     <StyledButton style={styledButton} type="submit">Submit</StyledButton>
                 </form>
@@ -50,7 +53,7 @@ const Admin = () => {
                     <StyledButton style={styledButton} type="submit">Create Schemas</StyledButton>
                 </StyledForm> */}
 
-                <StyledForm method="POST" action="/csv-download" enctype="multipart/form-data" >
+                <StyledForm method="POST" action={csvDownload} enctype="multipart/form-data" >
                     <StyledTextInput type="text" name="username" placeholder='Enter username'>
                         {/* <option>opt</option> */}
                         <option value="ALL" name="option_tag" selected>
@@ -76,7 +79,7 @@ const Admin = () => {
                 </StyledForm>
             </StyledFlexContainer>
 
-            <StyledCompareForm method="POST" action="/compare-annotators" enctype="multipart/form-data" >
+            <StyledCompareForm method="POST" action={compareAnnotators} enctype="multipart/form-data" >
                 <StyledFlexRow>
                     <StyledTextInput type="text" name="username1" placeholder='Enter username'>
                         {/* <option>opt</option> */}

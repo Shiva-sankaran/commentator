@@ -12,7 +12,7 @@ const Navbar = () => {
     const logged_in_admin = JSON.parse(sessionStorage.getItem('annote_admin'));
     const logoutHandler = async () => {
 
-        const res = await axios.post('/logout', {
+        const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/logout`, {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',
@@ -37,11 +37,13 @@ const Navbar = () => {
         //   .then(res => console.log(res))
         //   .catch(err => console.log(err));
     };
+
+    const createSchemas = process.env.REACT_APP_BACKEND_URL + '/sentence-schema-creation'
     return (
         <StyledNavbarContainer>
             <StyledName onClick={() => history('/')}>COMMENTATOR</StyledName>
             <StyledFlex>
-                    {logged_in_admin && (<StyledForm method="POST" action="/sentence-schema-creation" enctype="multipart/form-data" >
+                    {logged_in_admin && (<StyledForm method="POST" action={createSchemas} enctype="multipart/form-data" >
                         <StyledButton type="submit">Create Schemas</StyledButton>
                     </StyledForm>)}
                 {!logged_in_admin && (<StyledUsername onClick={() => history('/profile')} style={{ cursor: 'pointer' }}>Edit Annotations</StyledUsername>)}

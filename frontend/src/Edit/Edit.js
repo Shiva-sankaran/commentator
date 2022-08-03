@@ -84,7 +84,7 @@ const Edit = props => {
                 id,
                 logged_in_user,
             };
-            const res = await axios.post('/get-edit-sentence', {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/get-edit-sentence`, {
                 method: "POST",
                 headers: {
                     'Content-type': 'application-json',
@@ -174,7 +174,7 @@ const Edit = props => {
             hypertext,
             timeDifference,
         };
-        const res = await axios.post('/submit-edit-sentence', {
+        const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/submit-edit-sentence`, {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',

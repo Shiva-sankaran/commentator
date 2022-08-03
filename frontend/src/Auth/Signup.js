@@ -38,7 +38,7 @@ const Signup = props => {
             username,
             password,
         };
-        const res = await axios.post('/signup', {
+        const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/signup`, {
             method: "POST",
             headers: {
                 'Content-type': 'application-json',
@@ -62,25 +62,37 @@ const Signup = props => {
     };
 
     return (
-        <StyledBox
-        component="form"
-        sx={{
-            '& > :not(style)': { m: 1 },
-        }}
-        noValidate
-        autoComplete="off"
-        >
-            <StyledHeader>Sign Up</StyledHeader>
-            <StyledTextField id="login_username" label="username" variant="outlined" onChange={e => setUsername(e.target.value)}/>
-            <StyledTextField id="login_password" label="password" variant="outlined" onChange={e => setPassword(e.target.value)} type='password'/>
-            <StyledTextField id="login_confirm_password" label="confirm password" variant="outlined" onChange={e => setConfirmPassword(e.target.value)} type='password'/>
-            {showErr && (<Alert severity="error">Password did not match, kindly re-enter.</Alert>)}
-            <StyledButton variant="contained" onClick={onSubmitHandler}>Submit</StyledButton>
-        </StyledBox>
+        <div>
+            <StyledTitle>Commentator: A Code-mixed Multilingual Text Annotation Framework</StyledTitle>
+            <StyledBox
+            component="form"
+            sx={{
+                '& > :not(style)': { m: 1 },
+            }}
+            noValidate
+            autoComplete="off"
+            >
+                <StyledHeader>Sign Up</StyledHeader>
+                <StyledTextField id="login_username" label="username" variant="outlined" onChange={e => setUsername(e.target.value)}/>
+                <StyledTextField id="login_password" label="password" variant="outlined" onChange={e => setPassword(e.target.value)} type='password'/>
+                <StyledTextField id="login_confirm_password" label="confirm password" variant="outlined" onChange={e => setConfirmPassword(e.target.value)} type='password'/>
+                {showErr && (<Alert severity="error">Password did not match, kindly re-enter.</Alert>)}
+                <StyledButton variant="contained" onClick={onSubmitHandler}>Submit</StyledButton>
+            </StyledBox>
+        </div>
     );
 };
 
 export default Signup;
+
+const StyledTitle = styled.div`
+  font-size: 30px;
+  text-align: center;
+  margin: auto;
+  width: 100%;
+  color: #333;
+  margin-bottom: 50px;
+`;
 
 const StyledHeader = styled.p`
     font-size: 40px;

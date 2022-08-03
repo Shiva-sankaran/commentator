@@ -37,7 +37,7 @@ const Profile = () => {
         const data = {
             username
         };
-        const res = axios.post('/all-sentences', {
+        const res = axios.post(`${process.env.REACT_APP_BACKEND_URL}/all-sentences`, {
             method: "POST",
             headers: {
               "Content-type": "application-json",

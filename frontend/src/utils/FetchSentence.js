@@ -5,7 +5,7 @@ const FetchSentence = async () => {
     const data = {
         id,
     };
-    const res = await axios.post('/get-sentence', {
+    const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/get-sentence`, {
         method: "POST",
         headers: {
             'Content-type': 'application-json',

@@ -22,7 +22,7 @@ Session(app)
 sess = Session()
 sess.init_app(app)
 
-frontend = 'http://localhost:3000'
+frontend = 'http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com'
 # conn_str = os.environ.get("DATABASE_URL")
 conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
 
@@ -75,6 +75,7 @@ def register():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def login():
     user_collection = database.get_collection('users')
 
@@ -133,15 +134,16 @@ def is_logged_in(f):
     return wrap
 
 
-@app.route('/logout', methods=['POST'])
-@is_logged_in
+@app.route('/logout', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+# @is_logged_in
 def logout():
     session.clear()
     return jsonify({'message': "You are logged out"})
 
 
-@app.route('/get-sentence', methods=['POST'])
-# @is_logged_in
+@app.route('/get-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type'])
 def get_sentence():
     sentences_collection = database.get_collection('sentences')
     requestdata = json.loads(request.data)
@@ -165,7 +167,8 @@ def get_sentence():
     return jsonify({'result': result})
 
 
-@app.route('/get-lid-data', methods=['POST'])
+@app.route('/get-lid-data', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def lid_tag():
     # from LID_tool.getLanguage import langIdentify
 
@@ -197,7 +200,8 @@ def lid_tag():
     return jsonify({'result': tags})
 
 
-@app.route('/admin-file-upload', methods=['POST'])
+@app.route('/admin-file-upload', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def admin_file_upload():
     # requestdata = json.loads(request.data)
     # print(requestdata)
@@ -287,7 +291,8 @@ def admin_file_upload():
     return redirect('{}/admin'.format(frontend))
 
 
-@app.route('/sentence-schema-creation', methods=['POST'])
+@app.route('/sentence-schema-creation', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def sentence_schema_creation():
     try:
         database.create_collection('users')
@@ -308,7 +313,8 @@ def sentence_schema_creation():
     return redirect('{}/admin'.format(frontend))
 
 
-@app.route('/fetch-users-list', methods=['POST'])
+@app.route('/fetch-users-list', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def fetch_users_list():
     user_collection = database.get_collection('users')
     user_list = user_collection.find({})
@@ -324,7 +330,8 @@ def fetch_users_list():
     return jsonify({'result': users_list})
 
 
-@app.route('/csv-download', methods=['POST'])
+@app.route('/csv-download', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def csv_download():
     from flask import send_file
 
@@ -341,7 +348,7 @@ def csv_download():
         print(user)
         sentTag = user[0]['sentTag']
 
-        with open('./csv/{}.csv'.format(username), 'w', encoding='utf-8', newline="") as f:
+        with open('csv/{}.csv'.format(username), 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
 
             writer.writerow(['grammar', 'date', 'tag', 'link',
@@ -390,7 +397,7 @@ def csv_download():
         user = users_collection.find()
         user = list(user)
         print(username['username'] for username in user)
-        with open('./csv/all.csv', 'w', encoding='utf-8', newline="") as f:
+        with open('csv/all.csv', 'w', encoding='utf-8', newline="") as f:
             writer = csv.writer(f)
             writer.writerow(['User', 'grammar', 'date', 'tag', 'link',
                                      'hashtag', 'time', 'CMI Score'])
@@ -437,7 +444,7 @@ def csv_download():
                             writer.writerow(row)
                     # break
 
-        return send_file('csv/{}.csv'.format(username), as_attachment=True)
+        return send_file('csv/all.csv', as_attachment=True)
 
     # print(username)
     # return jsonify({'result': 'Done'})
@@ -446,7 +453,8 @@ def csv_download():
     return
 
 
-@app.route('/compare-annotators', methods=['POST'])
+@app.route('/compare-annotators', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def compare_annotators():
     from flask import send_file
 
@@ -479,7 +487,7 @@ def compare_annotators():
     sentTag1 = user1[0]['sentTag']
     sentTag2 = user2[0]['sentTag']
 
-    with open('./csv/compare.csv', 'w', encoding='utf-8', newline="") as f:
+    with open('csv/compare.csv', 'w', encoding='utf-8', newline="") as f:
         writer = csv.writer(f)
 
         writer.writerow(['grammar_{}'.format(username1_name), 'date_{}'.format(username1_name), 'tag_{}'.format(username1_name), 'link_{}'.format(username1_name), 'hashtag_{}'.format(username1_name), 'time_{}'.format(username1_name), '', 'grammar_{}'.format(username2_name), 'date_{}'.format(username2_name), 'tag_{}'.format(username2_name), 'link_{}'.format(username2_name), 'hashtag_{}'.format(username2_name),
@@ -533,7 +541,8 @@ def compare_annotators():
     return send_file('csv/compare.csv', as_attachment=True)
 
 
-@app.route('/submit-sentence', methods=['POST'])
+@app.route('/submit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
 def submit_sentence():
     user_collection = database.get_collection('users')
@@ -582,7 +591,8 @@ def submit_sentence():
 
 #     return jsonify({'result': 'Message Stored Successfully'})
 
-@app.route('/get-edit-sentence', methods=['POST'])
+@app.route('/get-edit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
 def get_edit_sentence():
     user_collection = database.get_collection('users')
@@ -605,7 +615,8 @@ def get_edit_sentence():
     return jsonify({'result': userTags})
 
 
-@app.route('/submit-edit-sentence', methods=['POST'])
+@app.route('/submit-edit-sentence', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 # @is_logged_in
 def submit_edit_sentence():
     user_collection = database.get_collection('users')
@@ -644,8 +655,9 @@ def submit_edit_sentence():
     return jsonify({'result': 'Message Stored Successfully'})
 
 
-@app.route('/all-sentences', methods=['POST'])
+@app.route('/all-sentences', methods=['GET', 'POST'])
 # @is_logged_in
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def all_sentence():
     user_collection = database.get_collection('users')
     requestdata = json.loads(request.data)
