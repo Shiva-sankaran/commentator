@@ -88,6 +88,7 @@ d. Updating MongoDB URL
 e. Download LID Code from the google drive link attached above
 
 > Navigate to Drive > Downloads > LID & download the zip file
+>
 > Extract zip file in LID_tool folder
 
 f. Running the local server
@@ -171,6 +172,7 @@ e. Stop Docker Container by Container ID.
 a. Backend
 
 > AWS EC2 Instance is used to host the docker container
+>
 > Quick Guide: https://youtu.be/awFLzy0XwXo
 
 In the SSH Terminal
@@ -183,6 +185,7 @@ The updated backend URL `http://<public_IPv4_address>:5000`
 b. Frontend
 
 > AWS S3 Bucket is used to host the frontend website
+>
 > Quick Guide: https://blog.cloudthat.com/step-by-step-guide-to-deploy-reactjs-app-on-aws-s3/
 
 ##### Steps to create build
