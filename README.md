@@ -4,19 +4,56 @@
 - Code-mixing on Hinglish Data.
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc.
 
-### 1. Relevant Links
+### 1. Relevant Links :link:
 
 Source Code: [`https://github.com/Shubh-Nisar/commentator`](https://github.com/Shubh-Nisar/commentator)
 
-Youtube Demo: [`https://youtu.be/pFqcwyjAfB4`](https://youtu.be/pFqcwyjAfB4)
+---
 
-Live Demo Site: [`http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/`](http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/)
+Youtube Demo:
 
-Drive: [`https://drive.google.com/drive/commentator`](https://drive.google.com/drive/folders/1f5TpFEQiadBCGhvNDXgKpOQg7x3OvT88?usp=sharing)
+<figure>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pFqcwyjAfB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<figure>
 
 ---
 
-### 2. Folder Structure
+Live Demo Site: [`http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/`](http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/)
+
+> Usage
+
+##### As an Annotator
+
+- Sign-Up to create a new annotator account
+- Login using the credentials
+
+##### As an Admin
+
+- Special Credentials :wink:
+  >     username: commentator
+  >
+  > password: commentator
+
+---
+
+Drive: [`https://drive.google.com/drive/commentator`](https://drive.google.com/drive/folders/1f5TpFEQiadBCGhvNDXgKpOQg7x3OvT88?usp=sharing)
+
+> Drive Structure
+
+```
+COMMENTATOR
+	Downloads
+		LID
+			ms_lid.zip					# Microsoft Language Identification Code
+	Reports
+		data
+			hindi_english.csv			# Hindi-English Dataset (10 sentences)
+			gujarati_english.csv		# Gujarati-English Dataset (10 sentences)
+```
+
+---
+
+### 2. Folder Structure :books:
 
 ```
 backend
@@ -51,7 +88,7 @@ fronend
 
 ---
 
-### 3. Database Schemas
+### 3. Database Schemas :department_store:
 
 |           |                                             |
 | --------- | ------------------------------------------- |
@@ -59,7 +96,7 @@ fronend
 | sentences | Sentences to be annotated                   |
 | users     | Admin & Annotator Accounts                  |
 
-### 4. Backend [ Local Server ]
+### 4. Backend [ Local Server ] :computer:
 
 ##### Steps to Follow
 
@@ -99,7 +136,7 @@ f. Running the local server
 
 ---
 
-### 5. Frontend [ Local Server ]
+### 5. Frontend [ Local Server ] :computer:
 
 ##### Steps to Follow
 
@@ -118,7 +155,7 @@ c. Start the frontend local server.
 
 ---
 
-### 6. Administrative Configuration
+### 6. Administrative Configuration :passport_control:
 
 ##### Steps to Follow
 
@@ -128,7 +165,7 @@ c. Start the frontend local server.
 4. Login to Admin Dashboard.
 5. Upload sentences to the database (csv).
 
-### 7. Containerization of Backend using Docker
+### 7. Containerization of Backend using Docker :whale2:
 
 ##### Steps to Follow
 
@@ -167,7 +204,7 @@ e. Stop Docker Container by Container ID.
 
 ---
 
-### 8. Hosting
+### 8. Hosting :globe_with_meridians:
 
 a. Backend
 
@@ -195,7 +232,7 @@ b. Frontend
 
 The updated frontend URL is available at Properties > Static Web Hosting
 
-### 9. Contributors
+### 9. Contributors :busts_in_silhouette:
 
 |                                                                                                                                           |                  |                                                                                |
 | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------ |
@@ -203,7 +240,7 @@ The updated frontend URL is available at Properties > Static Web Hosting
 | <img  width="75"  alt="vs"  src="">                                                                                                       | Vivek Srivastava | [`https://sites.google.com/view/vivek-srivastava/`](https://www.linkedin.com/) |
 | <img  width="75"  alt="ms"  src="">                                                                                                       | Mayank Singh     | [`https://mayank4490.github.io/`](https://mayank4490.github.io/)               |
 
-### 10. Mentions
+### 10. Mentions :eyes:
 
 - https://github.com/microsoft/LID-tool
 - https://fasttext.cc/
