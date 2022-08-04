@@ -40,10 +40,10 @@ Drive: [`https://drive.google.com/drive/commentator`](https://drive.google.com/d
 COMMENTATOR
 	Downloads
 		LID
-			ms_lid.zip					# Microsoft Language Identification Code
+			ms_lid.zip			# Microsoft Language Identification Code
 	Reports
 		data
-			hindi_english.csv			# Hindi-English Dataset (10 sentences)
+			hindi_english.csv		# Hindi-English Dataset (10 sentences)
 			gujarati_english.csv		# Gujarati-English Dataset (10 sentences)
 ```
 
