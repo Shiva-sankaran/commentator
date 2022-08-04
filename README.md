@@ -10,12 +10,7 @@ Source Code: [`https://github.com/Shubh-Nisar/commentator`](https://github.com/S
 
 ---
 
-Youtube Demo:
-
-<figure class="video_container">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/pFqcwyjAfB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
-<figure>
+Youtube Demo: [`https://youtu.be/pFqcwyjAfB4`](https://youtu.be/pFqcwyjAfB4)
 
 ---
 
@@ -31,9 +26,9 @@ Live Demo Site: [`http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com/`
 ##### As an Admin
 
 - Special Credentials :wink:
-  >     username: commentator
-  >
-  > password: commentator
+
+      username: commentator
+      password: commentator
 
 ---
 
