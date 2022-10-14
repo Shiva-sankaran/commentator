@@ -18,6 +18,8 @@ const Login = (props) => {
       username,
       password,
     };
+    console.log(process.env.REACT_APP_BACKEND_URL)
+
     const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/login`, {
       method: "POST",
       headers: {

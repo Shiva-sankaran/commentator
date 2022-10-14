@@ -22,17 +22,37 @@ Session(app)
 sess = Session()
 sess.init_app(app)
 
-frontend = 'http://commentator-iitgn.s3-website.ap-south-1.amazonaws.com'
+frontend = 'http://localhost:3000'
 # conn_str = os.environ.get("DATABASE_URL")
-conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
+# conn_str = "mongodb+srv://annotation_user:pwKzLUGrQxpd3UnD@annotation.lamba.mongodb.net/annotation_tool?retryWrites=true&w=majority"
+
+# # set a 5-second connection timeout
+# client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
+# database = client['annotation_tool']
+
+conn_str = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.0"
 
 # set a 5-second connection timeout
-client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
-database = client['annotation_tool']
 try:
+    client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
+    database = client['annotation_tool']
+
+
     print("\nConnected to the db.\n")
 except Exception:
     print("Unable to connect to the server.")
+
+# mydatabase = client['shiva_dummy']
+# mycollection=mydatabase['myTable']
+# rec={
+# 'title': 'MongoDB and Python', 
+# 'description': 'MongoDB is no SQL database', 
+# 'tags': ['mongodb', 'database', 'NoSQL'], 
+# 'viewers': 104 
+# }
+  
+# inserting the data in the database
+# rec = mycollection.insert_one(rec)
 
 
 @app.route('/test', methods=['GET'])
@@ -77,6 +97,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def login():
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     user_collection = database.get_collection('users')
 
     requestdata = json.loads(request.data)
@@ -145,17 +166,20 @@ def logout():
 @app.route('/get-sentence', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type'])
 def get_sentence():
+    print("Gettting sentence\n\n\n")
     sentences_collection = database.get_collection('sentences')
     requestdata = json.loads(request.data)
     print(requestdata)
     requestdata = json.loads(requestdata['body'])
 
     sentId = requestdata['id']
-    print(sentId)
+    # print(sentId)
     result = sentences_collection.find({'sid': sentId})
     data = list(result)
     data = data[0]
     sentence = data['sentence']
+    print("Found sentid:",sentId)
+    print("Found setence:",sentence)
 
     # os.system("/LID_tool/getLanguage.py sampleinp.txt")
 
@@ -172,6 +196,38 @@ def get_sentence():
 def lid_tag():
     # from LID_tool.getLanguage import langIdentify
 
+    requestdata = json.loads(request.data)
+    # print(requestdata)
+    requestdata = json.loads(requestdata['body'])
+
+    sid = requestdata['sentId']
+    # print('SENTENCE = ', sid)
+
+    # lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
+    # tags = []
+    # print(lang)
+    # for elem in lang:
+    #     inter = [elem[0]]
+    #     for i in range(1, len(elem)):
+    #         if elem[i] is '1':
+    #             inter.append(elem[i-1][0])
+    #     if len(inter) == 1:
+    #         inter.append('u')
+    #     tags.append(inter)
+
+    # print('LANGUAGE TAG = ', tags)
+    lid_collection = database.get_collection('lid')
+    prev = lid_collection.find()
+    prev = list(prev)
+    # print(prev)
+    tags = prev[int(sid)-1]['tags']
+    return jsonify({'result': tags})
+
+@app.route('/get-sentiment-data', methods=['GET', 'POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def sentiment_tag():
+    # from LID_tool.getLanguage import langIdentify
+    print("SENTIMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n")
     requestdata = json.loads(request.data)
     print(requestdata)
     requestdata = json.loads(requestdata['body'])
@@ -192,12 +248,18 @@ def lid_tag():
     #     tags.append(inter)
 
     # print('LANGUAGE TAG = ', tags)
-    lid_collection = database.get_collection('lid')
-    prev = lid_collection.find()
+    sentiment_collection = database.get_collection('sentiment')
+    prev = sentiment_collection.find()
     prev = list(prev)
-    print(prev)
-    tags = prev[int(sid)-1]['tags']
-    return jsonify({'result': tags})
+    # print(prev)
+    print(prev[int(sid)-1])
+    sentence_tag = prev[int(sid)-1]['sentence_tag']
+    word_tags = prev[int(sid)-1]['word_tags']
+    print("RETURNNING SENTIMENT DATA FROM BACKEND\n\n")
+    print(sentence_tag)
+    print(word_tags)
+    # print(jsonify({'sentence_tag': sentence_tag,'word_tags':word_tags}))
+    return jsonify({'result': [sentence_tag,word_tags]})
 
 
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
@@ -242,6 +304,9 @@ def admin_file_upload():
     print('Task Finished')
 
     # os.system('LID_execute.py 1 {}'.format(file.filename))
+    
+
+
     from LID_tool.getLanguage import langIdentify
     lid_collection = database.get_collection('lid')
 
@@ -266,6 +331,56 @@ def admin_file_upload():
     print(total_num_of_sent)
     print(prev_sent[start_index-1])
 
+
+    ## sentiment
+
+    from nltk.sentiment import SentimentIntensityAnalyzer
+    from nltk.tokenize import TweetTokenizer
+    import numpy as np
+    tk = TweetTokenizer(preserve_case = False)
+    sia = SentimentIntensityAnalyzer()
+    sentiment_collection = database.get_collection('sentiment')
+    mapping = ['n','i','p']
+    preds = []
+
+    for i in range(start_index-1, total_num_of_sent):
+        sentence = prev_sent[i]['sentence']
+        scores = sia.polarity_scores(sentence)
+        print("!!!!!!!!!!!!!!!!!!!sdfaddasfasdfa!\n\n\n")
+    
+        print(scores)
+        print(np.array(list(scores.values())[:-1]))
+        predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
+        print(predicted_label)
+
+        # indivudal words
+        word_emotions = []
+        word_polarity_scores = sia.lexicon
+        tokens = tk.tokenize(sentence)
+        for token in tokens:
+            if(token in word_polarity_scores.keys()):
+                if(word_polarity_scores[token] < -0.5):
+                    emo = 'n'
+                elif(word_polarity_scores[token] > 0.5):
+                    emo = "p"
+                else:
+                    emo = "i"
+            else:
+                emo = "i"
+            word_emotions.append([token,emo])
+
+
+        ###
+        sentiment_collection.insert_one({
+            'sentence_tag': predicted_label,
+            'word_tags':word_emotions,
+            'tag_id': last_row_id + 1
+        })
+
+
+
+    ## sentiment
+
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
         lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
@@ -275,7 +390,7 @@ def admin_file_upload():
         for elem in lang:
             inter = [elem[0]]
             for i in range(1, len(elem)):
-                if elem[i] is '1':
+                if elem[i] == '1':
                     inter.append(elem[i-1][0])
             if len(inter) == 1:
                 inter.append('u')
@@ -306,6 +421,10 @@ def sentence_schema_creation():
 
     try:
         database.create_collection('lid')
+    except:
+        print("Already exists")
+    try:
+        database.create_collection('sentiment')
     except:
         print("Already exists")
 

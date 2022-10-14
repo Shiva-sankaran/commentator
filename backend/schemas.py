@@ -20,4 +20,9 @@ try:
 except:
     print("Already exists")
 
+try:
+    database.create_collection('sentiment')
+except:
+    print("Already exists")
+
 print('Schemas Created')

@@ -7,6 +7,7 @@ const LanguageBtn = ({ selected, setSelected }) => {
         <StyledFlexer>
             <StyledEnBtn lang={selected} onClick={() => setSelected('e')}>English</StyledEnBtn>
             <StyledHiBtn lang={selected} onClick={() => setSelected('h')}>Hindi</StyledHiBtn>
+
         </StyledFlexer>
     );
 };
