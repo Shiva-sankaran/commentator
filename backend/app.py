@@ -337,21 +337,42 @@ def admin_file_upload():
     from nltk.sentiment import SentimentIntensityAnalyzer
     from nltk.tokenize import TweetTokenizer
     import numpy as np
+    from transformers import AutoTokenizer, AutoModelForSequenceClassification
+    from torch import nn
+    import torch.nn.functional as F
+    
     tk = TweetTokenizer(preserve_case = False)
     sia = SentimentIntensityAnalyzer()
     sentiment_collection = database.get_collection('sentiment')
     mapping = ['n','i','p']
     preds = []
+    VADER = False
+    if(VADER == False):
+        print("RUNNING CUSTOM MODEL")
+        tokenizer = AutoTokenizer.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
+        model = AutoModelForSequenceClassification.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
 
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
-        scores = sia.polarity_scores(sentence)
-        print("!!!!!!!!!!!!!!!!!!!sdfaddasfasdfa!\n\n\n")
-    
-        print(scores)
-        print(np.array(list(scores.values())[:-1]))
-        predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
+
+        if(VADER):
+            scores = sia.polarity_scores(sentence)
+            print("!!!!!!!!!!!!!!!!!!!sdfaddasfasdfa!\n\n\n")
+            print(scores)
+            print(np.array(list(scores.values())[:-1]))
+            predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
+
+
+        else:
+            encoded_input = tokenizer(sentence, return_tensors='pt')
+            output = model(**encoded_input)
+            scores = F.softmax(output.logits,dim=1).detach().cpu().numpy()[0]
+            predicted_label = mapping[scores.argmax()]
+
+
+
         print(predicted_label)
+
 
         # indivudal words
         word_emotions = []
