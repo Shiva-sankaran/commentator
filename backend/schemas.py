@@ -8,21 +8,21 @@ database = client['annotation_tool']
 try:
     database.create_collection('users')
 except:
-    print("Already exists")
+    print("Users Already exists")
 
 try:
     database.create_collection('sentences')
 except:
-    print("Already exists")
+    print("Sentences Already exists")
 
 try:
     database.create_collection('lid')
 except:
-    print("Already exists")
+    print("LID Already exists")
 
 try:
     database.create_collection('sentiment')
 except:
-    print("Already exists")
+    print("Sentiment Already exists")
 
 print('Schemas Created')

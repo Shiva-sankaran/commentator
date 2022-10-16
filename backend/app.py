@@ -115,6 +115,7 @@ def login():
         data = res[0]
         print(data['password'])
         sentId = data['sentId']
+        sentId = 0
         admin = data['admin'] if data['admin'] else False
         print(sentId)
         print(sha256_crypt.verify(password, data['password']))
@@ -173,7 +174,7 @@ def get_sentence():
     requestdata = json.loads(requestdata['body'])
 
     sentId = requestdata['id']
-    # print(sentId)
+    print("Sent ID",sentId)
     result = sentences_collection.find({'sid': sentId})
     data = list(result)
     data = data[0]
@@ -261,6 +262,70 @@ def sentiment_tag():
     # print(jsonify({'sentence_tag': sentence_tag,'word_tags':word_tags}))
     return jsonify({'result': [sentence_tag,word_tags]})
 
+def load_hindi_nets(HWN,HWSN):
+    Hindi_wordnet = {}
+    Hindi_sentinet = {}
+
+    HW_mapping = {'01':'n','02':'a','03':'v','04':'r'}
+    with open(HWN,'r') as fp:
+        line_to_start = 633
+        for i, line in enumerate(fp):
+            # print(i,line)
+            # read line 4 and 7
+            if i >=line_to_start:
+                temp = line.split(" ")
+                # if(i == 54352):
+                #     print(temp)
+                for j in range(6,len(temp)):
+                    # print(temp[j],len(temp[j]))
+                    # print(len(temp[j]) =="9")
+                    if(len(temp[j]) == 8):
+                        ID = temp[j]
+                        break
+                    elif(len(temp[j]) ==9 and temp[j][-1] =='\n'):
+                        ID = temp[j][:-1]
+                        break
+                # print((temp[0],HW_mapping[temp[1]]) )
+                try:
+                    Hindi_wordnet[temp[0]].append([HW_mapping[temp[1]], ID])
+                except:
+                    Hindi_wordnet[temp[0]] = [[HW_mapping[temp[1]], ID]]
+
+    data = pd.read_csv(HWSN, delimiter=' ')
+    fields = ['POS_TAG', 'ID', 'POS', 'NEG', 'LIST_OF_WORDS']
+
+    for i in data.index:
+        try:
+            Hindi_sentinet[data[fields[1]][i]].append([data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]])
+        except:
+            Hindi_sentinet[data[fields[1]][i]] = [[data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]]]
+
+    return Hindi_wordnet,Hindi_sentinet
+
+def get_hindi_senti(Hwordnet_items,Hsentinet):
+    # IDS = []
+    # for ele in Hwordnet_items[1]:
+    #     IDS.append(ele[0].strip("0"))
+
+    # ID = ID.strip("0")
+    print("word net item",Hwordnet_items)
+    # print(IDS)
+    for pos,ID in Hwordnet_items:
+        ID = int(ID)
+        print(ID,pos)
+        if(ID in Hsentinet.keys()):
+            print("present {} times in hindi sentinet".format(len(Hsentinet[ID])))
+            print("sentinet item",Hsentinet[ID])
+            for entry in Hsentinet[ID]:
+                if(entry[0]==pos):
+                    if(entry[1]>entry[2]):
+                        return 'p'
+                    elif(entry[1]<entry[2]):
+                        return 'n'
+                    else:
+                        return 'b'
+    
+    return 'i'
 
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -287,6 +352,7 @@ def admin_file_upload():
     print(last_row_id)
     prev = sentences_collection.find()
     prev = list(prev)
+    print("PREV",prev)
     if len(prev) > 0:
         prev = prev[-1]
         print(prev['sid'])
@@ -340,26 +406,50 @@ def admin_file_upload():
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
     from torch import nn
     import torch.nn.functional as F
+    import pandas as pd
+    import codecs
+    from hindiwsd import wsd, lesks
+    
     
     tk = TweetTokenizer(preserve_case = False)
     sia = SentimentIntensityAnalyzer()
+    word_polarity_scores = sia.lexicon
+
     sentiment_collection = database.get_collection('sentiment')
     mapping = ['n','i','p']
     preds = []
-    VADER = False
-    if(VADER == False):
+    CUSTOM_MODEL = True
+    CUSTOM_WORD_ENGLISH_SENT_FILE = False
+    CUSTOM_WORD_HINDI_SENT_FILE = False
+    if(CUSTOM_MODEL):
         print("RUNNING CUSTOM MODEL")
         tokenizer = AutoTokenizer.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
         model = AutoModelForSequenceClassification.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
+    
+    if(CUSTOM_WORD_HINDI_SENT_FILE == False ):
+        print("Loading default hindi word net and hindi word senti net to provide suggestions")
+        HWN = "/home/shivasankaran/HindiWN_1_5/database/index_txt"
+        HWSN = "/home/shivasankaran/gk-hinglish-sentiment/hindi_dict.txt"
+
+        Hwordnet,Hsentinet = load_hindi_nets(HWN,HWSN)
+
+        # data = pd.read_csv(HWSN, delimiter=' ')
+        # fields = ['POS_TAG', 'ID', 'POS', 'NEG', 'LIST_OF_WORDS']
+        # words_dict = {}
+        # for i in data.index:
+        #     words = data[fields[4]][i].split(',')
+        #     for word in words:
+        #         words_dict[word] = (data[fields[0]][i], data[fields[2]][i], data[fields[3]][i])
+
 
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
 
-        if(VADER):
+        if(CUSTOM_MODEL == False):
             scores = sia.polarity_scores(sentence)
             print("!!!!!!!!!!!!!!!!!!!sdfaddasfasdfa!\n\n\n")
-            print(scores)
-            print(np.array(list(scores.values())[:-1]))
+            # print(scores)
+            # print(np.array(list(scores.values())[:-1]))
             predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
 
 
@@ -374,34 +464,9 @@ def admin_file_upload():
         print(predicted_label)
 
 
-        # indivudal words
-        word_emotions = []
-        word_polarity_scores = sia.lexicon
-        tokens = tk.tokenize(sentence)
-        for token in tokens:
-            if(token in word_polarity_scores.keys()):
-                if(word_polarity_scores[token] < -0.5):
-                    emo = 'n'
-                elif(word_polarity_scores[token] > 0.5):
-                    emo = "p"
-                else:
-                    emo = "i"
-            else:
-                emo = "i"
-            word_emotions.append([token,emo])
-
-
-        ###
-        sentiment_collection.insert_one({
-            'sentence_tag': predicted_label,
-            'word_tags':word_emotions,
-            'tag_id': last_row_id + 1
-        })
-
-
 
     ## sentiment
-
+    flag = 1
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
         lang = langIdentify(sentence, 'classifiers/HiEn.classifier')
@@ -417,12 +482,70 @@ def admin_file_upload():
                 inter.append('u')
             tags.append(inter)
 
-        print('LANGUAGE TAG = ', tags)
+        print('\n\n\nLANGUAGE TAG = ', tags)
         lid_collection.insert_one({
             'tags': tags,
             'tag_id': last_row_id + 1
         })
+
+
+        # indivudal words
+        word_emotions = []
+        for word in tk.tokenize(sentence):
+        # for token,lang in tags:
+            # if(language == "e"):
+            if(CUSTOM_WORD_ENGLISH_SENT_FILE == False):
+                print("$$$$$$$$$$$$$$$$$$$\n\n")
+                print("Runnning default english senti word for word",word)
+                print("\n\n$$$$$$$$$$$$$$$$")
+                # tokens = tk.tokenize(sentence)
+                # word = word.lower()
+                if(word in word_polarity_scores.keys()):
+                    if(word_polarity_scores[word] < -0.5):
+                        emo = 'n'
+                    elif(word_polarity_scores[word] > 0.5):
+                        emo = "p"
+                    else:
+                        emo = "b"
+                else:
+                    print("word not present in english")
+                    hinglish, hindi_word = wsd.preprocess_transliterate(word)
+                    print("Hindi Sentence:", hindi_word)
+                    if(hindi_word in Hwordnet.keys()):
+                        emo = get_hindi_senti(Hwordnet[hindi_word],Hsentinet)
+                    else:
+                        print("word not present in hindi")
+                        emo = "i"
+                print(word,emo)
+                word_emotions.append([word,emo])
+            # else:
+            #     if(CUSTOM_WORD_HINDI_SENT_FILE == False):
+            #         print("RUNNNING HINDI WORD SENTI")
+            #         for word,language in tags:
+            #             word = word.lower()
+            #             hinglish, hindi_word = wsd.preprocess_transliterate(word)
+            #             print("Hindi Sentence:", hindi_word)
+            #             # print(hindi.split(" "))
+            #             if(word in Hwordnet.keys()):
+            #                 emo = get_hindi_senti(Hwordnet[word][0][1],Hwordnet[word],Hsentinet)
+            #                 flag = 0
+
+            #             else:
+            #                 emo = 'i'
+            #             word_emotions.append([word,emo])
+        print("!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>>>.")
+        print(word_emotions)
+
+        ###
+        sentiment_collection.insert_one({
+            'sentence_tag': predicted_label,
+            'word_tags':word_emotions,
+            'tag_id': last_row_id + 1
+        })
         last_row_id = last_row_id + 1
+        print("\n\n\n##############\n\n\n{}\n\n\n\###########\n\n\n".format(flag))
+
+
 
     return redirect('{}/admin'.format(frontend))
 
@@ -433,21 +556,21 @@ def sentence_schema_creation():
     try:
         database.create_collection('users')
     except:
-        print("Already exists")
+        print(" users Already exists")
 
     try:
         database.create_collection('sentences')
     except:
-        print("Already exists")
+        print(" sentences Already exists")
 
     try:
         database.create_collection('lid')
     except:
-        print("Already exists")
+        print(" lid Already exists")
     try:
         database.create_collection('sentiment')
     except:
-        print("Already exists")
+        print("sentiment Already exists")
 
     print('Schemas Created')
     return redirect('{}/admin'.format(frontend))

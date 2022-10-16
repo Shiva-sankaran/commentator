@@ -178,8 +178,11 @@ const Sentimental = props => {
             return 'n';
         }
         else if (letter === 'n'){
+            return 'b';
+        } else if(letter === 'b'){
             return 'i';
-        } else if(letter === 'i'){
+        }
+        else if(letter === 'i'){
             return 'p';
         }
     };
@@ -331,6 +334,7 @@ const StyledWord = styled.div`
 
     background-color: ${props => ((props.individualTag) === 'p') ? '#00FF00 ' : '#D4DCE9'};
     background-color: ${props => ((props.individualTag) === 'n') && '#FF0000'};
+    background-color: ${props => ((props.individualTag) === 'b') && '#0000FF'};
     cursor: pointer;
     display:flex;
     flex: 0 1 10%;
