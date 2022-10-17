@@ -39,18 +39,46 @@ const Admin = () => {
     const adminFileUpload = process.env.REACT_APP_BACKEND_URL + '/admin-file-upload'
     const csvDownload = process.env.REACT_APP_BACKEND_URL + '/csv-download'
     const compareAnnotators = process.env.REACT_APP_BACKEND_URL + '/compare-annotators'
+
     
     return (
         <div>
             <Navbar />
             <StyledFlexContainer>
+                
                 <form style={styledForm} method="POST" action={adminFileUpload} enctype="multipart/form-data" >
+                    <label for="file">Annotation file:</label>
                     <input type='file' name="file" onChange={e => setFile(e.target.files[0])}/>
+                    <label for="file1">Custom English sentiment:</label>
+                    <input type='file' name="file1" onChange={e => setFile(e.target.files[0])}/>
+                    <label for="file2">Custom Hinglish sentiment:</label>
+                    <input type='file' name="file2" onChange={e => setFile(e.target.files[0])}/>
+                    <label for="text">URL to HuggingFace model:</label>
+                    <input type='text' name="text" value="ganeshkharad/gk-hinglish-sentiment"/>
                     <StyledButton style={styledButton} type="submit">Submit</StyledButton>
                 </form>
 
+
                 {/* <StyledForm method="POST" action="/sentence-schema-creation" enctype="multipart/form-data" >
                     <StyledButton style={styledButton} type="submit">Create Schemas</StyledButton>
+                </StyledForm> */}
+                {/* <StyledForm method="POST" action={adminFileUpload} enctype="multipart/form-data" >
+                    <label for="file">Annotation file:</label>
+                    <input type='file' name="file" onChange={e => setFile(e.target.files[0])}/>
+                    <label for="file1">Custom English sentiment:</label>
+                    <input type='file' name="file1" onChange={e => setFile(e.target.files[0])}/>
+                    <label for="file2">Custom Hinglish sentiment:</label>
+                    <input type='file' name="file2" onChange={e => setFile(e.target.files[0])}/>    
+
+                    <StyledKappa
+                        name="cmi"
+                        type='text'
+                        placeholder='HuggingFace URL'
+                        onChange={(e) => setCmi(e.target.value)}
+                        required={true}
+                        style={{ marginLeft: 12, marginRight: 12 }}
+                    />
+                    <StyledButton style={styledButton} type="submit">Submit</StyledButton>
                 </StyledForm> */}
 
                 <StyledForm method="POST" action={csvDownload} enctype="multipart/form-data" >
@@ -78,6 +106,25 @@ const Admin = () => {
                     <StyledButton style={styledButton} type="submit">Download csv</StyledButton>
                 </StyledForm>
             </StyledFlexContainer>
+
+            {/* <StyledFlexContainer>
+                <form style={styledForm} method="POST" action={EngSentiFileUpload} enctype="multipart/form-data" >
+                    <input type='file' name="file" onChange={e => setFile(e.target.files[0])}/>
+                    <StyledButton style={styledButton} type="submit">Upload custom English sentiment file</StyledButton>
+                </form>
+
+                <form style={styledForm} method="POST" action={HindSentiFileUpload} enctype="multipart/form-data" >
+                    <input type='file' name="file" onChange={e => setFile(e.target.files[0])}/>
+                    <StyledButton style={styledButton} type="submit">Upload custom Hindi sentiment file</StyledButton>
+                </form>
+
+                <form style={styledForm} method="POST" action={ModelLink} enctype="multipart/form-data" >
+                    <input type='text' name="text"/>
+                    <StyledButton style={styledButton} type="submit">URL to HuggingFace model</StyledButton>
+                </form>
+
+            
+            </StyledFlexContainer> */}
 
             <StyledCompareForm method="POST" action={compareAnnotators} enctype="multipart/form-data" >
                 <StyledFlexRow>
@@ -137,9 +184,10 @@ const StyledForm = styled.form`
 
 const StyledFlexContainer = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
     gap: 20px;
 `;
 

@@ -12,6 +12,18 @@ from flask_cors import CORS, cross_origin
 import os
 import subprocess
 
+
+from nltk.sentiment import SentimentIntensityAnalyzer  #"ganeshkharad/gk-hinglish-sentiment"
+from nltk.tokenize import TweetTokenizer
+import numpy as np
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from torch import nn
+import torch.nn.functional as F
+import pandas as pd
+import codecs
+from hindiwsd import wsd, lesks
+
+
 app = Flask(__name__)
 
 cors = CORS(app, resources={
@@ -302,12 +314,7 @@ def load_hindi_nets(HWN,HWSN):
 
     return Hindi_wordnet,Hindi_sentinet
 
-def get_hindi_senti(Hwordnet_items,Hsentinet):
-    # IDS = []
-    # for ele in Hwordnet_items[1]:
-    #     IDS.append(ele[0].strip("0"))
-
-    # ID = ID.strip("0")
+def helper_hindi_senti(Hwordnet_items,Hsentinet):
     print("word net item",Hwordnet_items)
     # print(IDS)
     for pos,ID in Hwordnet_items:
@@ -327,20 +334,108 @@ def get_hindi_senti(Hwordnet_items,Hsentinet):
     
     return 'i'
 
+def load_custom_senti_file(file_path):
+    data = {}
+    print("LOADDING\n\n")
+    with open(file_path,'r') as fp:
+        for i, line in enumerate(fp):
+            temp = line.split(" ")
+            print(temp)
+
+            data[temp[0]] = temp[1][0]
+    
+    return data
+
+def get_def_eng_senti(word,word_polarity_scores):
+    if(word in word_polarity_scores.keys()):
+        if(word_polarity_scores[word] < -0.5):
+            return 'n'
+        elif(word_polarity_scores[word] > 0.5):
+            return "p"
+        else:
+            return "b"
+    else:
+        return 'i'
+
+def get_def_hinglish_senti(word,Hwordnet,Hsentinet):
+    hinglish, hindi_word = wsd.preprocess_transliterate(word)
+    if(hindi_word in Hwordnet.keys()):
+        return helper_hindi_senti(Hwordnet[hindi_word],Hsentinet)
+    else:
+        print("word not present in hindi")
+        return "i"
+
+def get_eng_senti(word,word_polarity_scores,custom_dict):
+    if(custom_dict != {}):
+        if(word in custom_dict.keys()):
+            return custom_dict[word]
+        else:
+            return get_def_eng_senti(word,word_polarity_scores)
+    else:
+        return get_def_eng_senti(word,word_polarity_scores)
+
+def get_hinglish_senti(word,Hwordnet,Hsentinet,custom_dict):
+    if(custom_dict != {}):
+        if(word in custom_dict.keys()):
+            return custom_dict[word]
+        else:
+            return get_def_hinglish_senti(word,Hwordnet,Hsentinet)
+    else:
+        return get_def_hinglish_senti(word,Hwordnet,Hsentinet)
+
+
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def admin_file_upload():
-    # requestdata = json.loads(request.data)
-    # print(requestdata)
-    print(request.files['file'])
-    file = request.files['file']
-    file.save('uploads/{}'.format(file.filename))
-    # requestdata = json.loads(requestdata['body'])
 
-    # file = requestdata['file']
-    # print('FILE = ', file)
+    CUSTOM_MODEL = False
+
+    tk = TweetTokenizer(preserve_case = False)
+    sentiment_collection = database.get_collection('sentiment')
+    mapping = ['n','i','p']
+    preds = []
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+    model_url = request.form.getlist('text')[0]
+    file = request.files['file']
+    eng_senti_file = request.files['file1']
+    heng_senti_file = request.files['file2']
+    english_senti_dict = {}
+    hinglish_senti_dict = {}
+
+    print("Loading default nltk VADER")
+    sia = SentimentIntensityAnalyzer()
+    word_polarity_scores = sia.lexicon
+    CUSTOM_WORD_ENGLISH_SENT_FILE = False
+
+    print("Loading default hindi word net and hindi word senti net to provide suggestions")
+    HWN = "/home/shivasankaran/HindiWN_1_5/database/index_txt"
+    HWSN = "/home/shivasankaran/gk-hinglish-sentiment/hindi_dict.txt"
+    Hwordnet,Hsentinet = load_hindi_nets(HWN,HWSN)
+    CUSTOM_WORD_HINGLISH_SENT_FILE = False
+
+    if(eng_senti_file.filename != ''):
+        print("Custom english sentiment file is uploaded")
+        eng_senti_file.save('uploads/{}_eng_senti'.format(eng_senti_file.filename))
+        english_senti_dict = load_custom_senti_file('uploads/{}_eng_senti'.format(eng_senti_file.filename))
+        CUSTOM_WORD_ENGLISH_SENT_FILE = True
+
+    if(heng_senti_file.filename != ''):
+        print("Custom hinglish sentiment file is uploaded")
+        heng_senti_file.save('uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
+        hinglish_senti_dict = load_custom_senti_file('uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
+        CUSTOM_WORD_HINGLISH_SENT_FILE = True
+
+
+    if(model_url != ''):
+        print("Loading CUSTOM MODEL")
+        tokenizer = AutoTokenizer.from_pretrained(model_url)
+        model = AutoModelForSequenceClassification.from_pretrained(model_url)
+        print("Model loaded")
+        CUSTOM_MODEL = True
+
+    file.save('uploads/{}_added'.format(file.filename))
     import pandas as pd
-    # os.system('db.py 1 {}'.format(file.filename))
     sentences_collection = database.get_collection('sentences')
 
     filename = file.filename
@@ -369,9 +464,6 @@ def admin_file_upload():
 
     print('Task Finished')
 
-    # os.system('LID_execute.py 1 {}'.format(file.filename))
-    
-
 
     from LID_tool.getLanguage import langIdentify
     lid_collection = database.get_collection('lid')
@@ -398,58 +490,13 @@ def admin_file_upload():
     print(prev_sent[start_index-1])
 
 
-    ## sentiment
-
-    from nltk.sentiment import SentimentIntensityAnalyzer
-    from nltk.tokenize import TweetTokenizer
-    import numpy as np
-    from transformers import AutoTokenizer, AutoModelForSequenceClassification
-    from torch import nn
-    import torch.nn.functional as F
-    import pandas as pd
-    import codecs
-    from hindiwsd import wsd, lesks
-    
-    
-    tk = TweetTokenizer(preserve_case = False)
-    sia = SentimentIntensityAnalyzer()
-    word_polarity_scores = sia.lexicon
-
-    sentiment_collection = database.get_collection('sentiment')
-    mapping = ['n','i','p']
-    preds = []
-    CUSTOM_MODEL = True
-    CUSTOM_WORD_ENGLISH_SENT_FILE = False
-    CUSTOM_WORD_HINDI_SENT_FILE = False
-    if(CUSTOM_MODEL):
-        print("RUNNING CUSTOM MODEL")
-        tokenizer = AutoTokenizer.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
-        model = AutoModelForSequenceClassification.from_pretrained("ganeshkharad/gk-hinglish-sentiment")
-    
-    if(CUSTOM_WORD_HINDI_SENT_FILE == False ):
-        print("Loading default hindi word net and hindi word senti net to provide suggestions")
-        HWN = "/home/shivasankaran/HindiWN_1_5/database/index_txt"
-        HWSN = "/home/shivasankaran/gk-hinglish-sentiment/hindi_dict.txt"
-
-        Hwordnet,Hsentinet = load_hindi_nets(HWN,HWSN)
-
-        # data = pd.read_csv(HWSN, delimiter=' ')
-        # fields = ['POS_TAG', 'ID', 'POS', 'NEG', 'LIST_OF_WORDS']
-        # words_dict = {}
-        # for i in data.index:
-        #     words = data[fields[4]][i].split(',')
-        #     for word in words:
-        #         words_dict[word] = (data[fields[0]][i], data[fields[2]][i], data[fields[3]][i])
-
+    ## overall sentiment
 
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
 
         if(CUSTOM_MODEL == False):
             scores = sia.polarity_scores(sentence)
-            print("!!!!!!!!!!!!!!!!!!!sdfaddasfasdfa!\n\n\n")
-            # print(scores)
-            # print(np.array(list(scores.values())[:-1]))
             predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
 
 
@@ -459,13 +506,11 @@ def admin_file_upload():
             scores = F.softmax(output.logits,dim=1).detach().cpu().numpy()[0]
             predicted_label = mapping[scores.argmax()]
 
-
-
         print(predicted_label)
 
+    ## overall sentiment
 
 
-    ## sentiment
     flag = 1
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
@@ -492,32 +537,44 @@ def admin_file_upload():
         # indivudal words
         word_emotions = []
         for word in tk.tokenize(sentence):
-        # for token,lang in tags:
-            # if(language == "e"):
-            if(CUSTOM_WORD_ENGLISH_SENT_FILE == False):
-                print("$$$$$$$$$$$$$$$$$$$\n\n")
-                print("Runnning default english senti word for word",word)
-                print("\n\n$$$$$$$$$$$$$$$$")
-                # tokens = tk.tokenize(sentence)
-                # word = word.lower()
-                if(word in word_polarity_scores.keys()):
-                    if(word_polarity_scores[word] < -0.5):
-                        emo = 'n'
-                    elif(word_polarity_scores[word] > 0.5):
-                        emo = "p"
-                    else:
-                        emo = "b"
-                else:
-                    print("word not present in english")
-                    hinglish, hindi_word = wsd.preprocess_transliterate(word)
-                    print("Hindi Sentence:", hindi_word)
-                    if(hindi_word in Hwordnet.keys()):
-                        emo = get_hindi_senti(Hwordnet[hindi_word],Hsentinet)
-                    else:
-                        print("word not present in hindi")
-                        emo = "i"
-                print(word,emo)
-                word_emotions.append([word,emo])
+            emo = get_eng_senti(word,word_polarity_scores,english_senti_dict)
+            if(emo == 'i'):
+                emo = get_hinglish_senti(word,Hwordnet,Hsentinet,hinglish_senti_dict)
+            word_emotions.append([word,emo])
+
+
+        # for word in tk.tokenize(sentence):
+        #     if(CUSTOM_WORD_ENGLISH_SENT_FILE == False):
+        #         print("$$$$$$$$$$$$$$$$$$$\n\n")
+        #         print("Runnning default VADER for word",word)
+        #         print("\n\n$$$$$$$$$$$$$$$$")
+        #         if(word in word_polarity_scores.keys()):
+        #             if(word_polarity_scores[word] < -0.5):
+        #                 emo = 'n'
+        #             elif(word_polarity_scores[word] > 0.5):
+        #                 emo = "p"
+        #             else:
+        #                 emo = "b"
+        #         else:
+        #             print("word not present in english")
+        #             hinglish, hindi_word = wsd.preprocess_transliterate(word)
+        #             print("Hindi Sentence:", hindi_word)
+        #             if(hindi_word in Hwordnet.keys()):
+        #                 emo = get_hindi_senti(Hwordnet[hindi_word],Hsentinet)
+        #             else:
+        #                 print("word not present in hindi")
+        #                 emo = "i"
+        #         print(word,emo)
+        #         word_emotions.append([word,emo])
+        #     else:
+        #         if(word in eng_sent_dict.keys()):
+        #             emo = eng_sent_dict[word]
+        #         else:
+        #             emo = 'i'
+
+        #         if(word in eng_sent_dict.keys()):
+        #             emo = eng_sent_dict[word]
+
             # else:
             #     if(CUSTOM_WORD_HINDI_SENT_FILE == False):
             #         print("RUNNNING HINDI WORD SENTI")
@@ -548,7 +605,6 @@ def admin_file_upload():
 
 
     return redirect('{}/admin'.format(frontend))
-
 
 @app.route('/sentence-schema-creation', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
