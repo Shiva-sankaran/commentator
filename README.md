@@ -1,8 +1,26 @@
 # COMMENTATOR
 
+
 - A Code-mixed Multilingual Text Annotation Framework.
 - Code-mixing on Hinglish Data.
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc.
+
+## ADDED FEATURES
+
+- Text Classfication (/sentimental)
+- Custom model to provide sentence-level suggestions from huggingface
+- Word level sentiment suggestions through lookup
+
+
+## Evaluation of Tool
+
+- Accuracy of sentece-level suggestions
+- Precision, Recall, F1 for word-level suggestions
+
+## Demo
+
+[Video link](https://drive.google.com/file/d/1RJZL6_AqltNcX355nRxnV-Lzyy3Zebo5/view?usp=sharing)
+
 
 ### 1. Relevant Links :link:
 
