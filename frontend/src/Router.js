@@ -7,7 +7,7 @@ import { createBrowserHistory } from 'history';
 import Login from './Auth/Login';
 import Signup from './Auth/Signup';
 import Home from './Home/Home';
-import Sentimental from './Home/Sentimental'
+import Sentiment from './Home/Sentiment'
 import Admin from './Admin/Admin';
 
 // COMPONENTS
@@ -35,7 +35,7 @@ const Router = () => {
                     <Route exact path='/profile' element={<Profile/>}/>
                     <Route exact path='/edit/:sid' element={<Edit/>}/>
                     <Route exact path='/intermediate' element={<Intermediate/>}/>
-                    <Route exact path='/sentimental' element={<Sentimental/>}/>
+                    <Route exact path='/sentiment' element={<Sentiment/>}/>
                     <Route exact path='/' element={<Home/>}/>
                 </Route>
             </Routes>
