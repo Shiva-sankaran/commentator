@@ -808,7 +808,7 @@ def submit_sentence():
 
     user_collection.update_one({'username': username}, {
         '$set': {'sentId': sentId},
-        '$push': {'sentTag': lst}
+        '$push': {'sentTag_new': lst}
     })
 
     return jsonify({'result': 'Message Stored Successfully'})
