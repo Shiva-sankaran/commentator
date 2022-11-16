@@ -12,6 +12,7 @@ import QnaPage from './Home/QNA'
 import Admin from './Admin/Admin';
 import POS from './Home/POS'  
 import Sent_qual from './Home/Sent_qual'  
+import Summ from './Home/Summarize'  
 import ProtectedRoute from './utils/ProtectedRoute';
 import AdminRoute from './utils/AdminRoute';
 import Intermediate from './Home/Intermediate';
@@ -42,6 +43,7 @@ const Router = () => {
                     <Route exact path='/SentQ' element={<Sent_qual/>}/>
                     <Route exact path='/POS' element={<POS/>}/>
                     <Route exact path='/NER' element={<NER/>}/>
+                    <Route exact path='/Summ' element={<Summ/>}/>
                     <Route exact path='/' element={<Home/>}/>
                 </Route>
             </Routes>
