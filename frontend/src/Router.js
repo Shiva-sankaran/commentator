@@ -8,9 +8,10 @@ import Login from './Auth/Login';
 import Signup from './Auth/Signup';
 import Home from './Home/Home';
 import Sentiment from './Home/Sentiment'
+import QnaPage from './Home/QNA'
 import Admin from './Admin/Admin';
-
-// COMPONENTS
+import POS from './Home/POS'  
+import Sent_qual from './Home/Sent_qual'  
 import ProtectedRoute from './utils/ProtectedRoute';
 import AdminRoute from './utils/AdminRoute';
 import Intermediate from './Home/Intermediate';
@@ -36,6 +37,9 @@ const Router = () => {
                     <Route exact path='/edit/:sid' element={<Edit/>}/>
                     <Route exact path='/intermediate' element={<Intermediate/>}/>
                     <Route exact path='/sentiment' element={<Sentiment/>}/>
+                    <Route exact path='/QNA' element={<QnaPage/>}/>
+                    <Route exact path='/SentQ' element={<Sent_qual/>}/>
+                    <Route exact path='/POS' element={<POS/>}/>
                     <Route exact path='/' element={<Home/>}/>
                 </Route>
             </Routes>
