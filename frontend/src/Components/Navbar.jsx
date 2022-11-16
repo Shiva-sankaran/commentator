@@ -41,7 +41,10 @@ const Navbar = () => {
     const createSchemas = process.env.REACT_APP_BACKEND_URL + '/sentence-schema-creation'
     return (
         <StyledNavbarContainer>
-            <StyledName onClick={() => history('/')}>COMMENTATOR</StyledName>
+            <StyledFlex>
+                <StyledName onClick={() => history('/')}>COMMENTATOR</StyledName>
+                <StyledName onClick={() => history('/NER')}>NER</StyledName>
+            </StyledFlex>
             <StyledFlex>
                     {logged_in_admin && (<StyledForm method="POST" action={createSchemas} enctype="multipart/form-data" >
                         <StyledButton type="submit">Create Schemas</StyledButton>
