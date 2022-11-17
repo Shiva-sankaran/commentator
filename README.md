@@ -6,16 +6,16 @@
 - Easy extensibility to other code-mixed language pairs such as Gujarati-English, Marathi-English etc.
 
 ## ADDED FEATURES
-
+There is no dashboard or index page to navigate to each feature. So, use the following to navigate to features
 - Text Classfication (/sentimental)
-- Custom model to provide sentence-level suggestions from huggingface
-- Word level sentiment suggestions through lookup
+- Question answering (/QNA)
+- Summarizer(/Summ)
+- POS tagging(/POS)
+- Sentence quality rating (/Sent_qual)
+- Named Entity Recognition(/NER)
 
 
-## Evaluation of Tool
 
-- Accuracy of sentece-level suggestions
-- Precision, Recall, F1 for word-level suggestions
 
 ## Demo
 
