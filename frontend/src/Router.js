@@ -18,6 +18,7 @@ import AdminRoute from './utils/AdminRoute';
 import Intermediate from './Home/Intermediate';
 import Profile from './User/Profile';
 import Edit from './Edit/Edit';
+import NER from './NER/ner';
 
 const Router = () => {
     const history = createBrowserHistory();
@@ -41,6 +42,7 @@ const Router = () => {
                     <Route exact path='/QNA' element={<QnaPage/>}/>
                     <Route exact path='/SentQ' element={<Sent_qual/>}/>
                     <Route exact path='/POS' element={<POS/>}/>
+                    <Route exact path='/NER' element={<NER/>}/>
                     <Route exact path='/Summ' element={<Summ/>}/>
                     <Route exact path='/' element={<Home/>}/>
                 </Route>

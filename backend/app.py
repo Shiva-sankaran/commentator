@@ -8,12 +8,13 @@ import pandas as pd
 from passlib.hash import sha256_crypt
 from functools import wraps
 import json
+import requests
 from flask_cors import CORS, cross_origin
 import os
 import subprocess
 
-
-from nltk.sentiment import SentimentIntensityAnalyzer  #"ganeshkharad/gk-hinglish-sentiment"
+# "ganeshkharad/gk-hinglish-sentiment"
+from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import TweetTokenizer
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -37,15 +38,22 @@ sess.init_app(app)
 frontend = 'http://localhost:3000'
 conn_str = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.0"
 
+API_URL = "https://api-inference.huggingface.co/models/sagorsarker/codeswitch-hineng-ner-lince"
+headers = {"Authorization": f"Bearer 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"}
+
+client2 = pymongo.MongoClient(
+    'mongodb+srv://root:sjjoshi@cluster0.5xthhz8.mongodb.net/test')
+db = client2.hinglish
+
 # set a 5-second connection timeout
 try:
     client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
     database = client['annotation_tool']
 
-
     print("\nConnected to the db.\n")
 except Exception:
     print("Unable to connect to the server.")
+
 
 @app.route('/test', methods=['GET'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -212,6 +220,7 @@ def lid_tag():
     tags = prev[int(sid)-1]['tags']
     return jsonify({'result': tags})
 
+
 @app.route('/get-sentiment-data', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def sentiment_tag():
@@ -235,29 +244,30 @@ def sentiment_tag():
     print(sentence_tag)
     print(word_tags)
     # print(jsonify({'sentence_tag': sentence_tag,'word_tags':word_tags}))
-    return jsonify({'result': [sentence_tag,word_tags]})
+    return jsonify({'result': [sentence_tag, word_tags]})
 
-def load_hindi_nets(HWN,HWSN):
+
+def load_hindi_nets(HWN, HWSN):
     Hindi_wordnet = {}
     Hindi_sentinet = {}
 
-    HW_mapping = {'01':'n','02':'a','03':'v','04':'r'}
-    with open(HWN,'r') as fp:
+    HW_mapping = {'01': 'n', '02': 'a', '03': 'v', '04': 'r'}
+    with open(HWN, 'r') as fp:
         line_to_start = 633
         for i, line in enumerate(fp):
             # print(i,line)
             # read line 4 and 7
-            if i >=line_to_start:
+            if i >= line_to_start:
                 temp = line.split(" ")
                 # if(i == 54352):
                 #     print(temp)
-                for j in range(6,len(temp)):
+                for j in range(6, len(temp)):
                     # print(temp[j],len(temp[j]))
                     # print(len(temp[j]) =="9")
-                    if(len(temp[j]) == 8):
+                    if (len(temp[j]) == 8):
                         ID = temp[j]
                         break
-                    elif(len(temp[j]) ==9 and temp[j][-1] =='\n'):
+                    elif (len(temp[j]) == 9 and temp[j][-1] == '\n'):
                         ID = temp[j][:-1]
                         break
                 # print((temp[0],HW_mapping[temp[1]]) )
@@ -271,89 +281,99 @@ def load_hindi_nets(HWN,HWSN):
 
     for i in data.index:
         try:
-            Hindi_sentinet[data[fields[1]][i]].append([data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]])
+            Hindi_sentinet[data[fields[1]][i]].append(
+                [data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]])
         except:
-            Hindi_sentinet[data[fields[1]][i]] = [[data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]]]
+            Hindi_sentinet[data[fields[1]][i]] = [
+                [data[fields[0]][i], data[fields[2]][i], data[fields[3]][i]]]
 
-    return Hindi_wordnet,Hindi_sentinet
+    return Hindi_wordnet, Hindi_sentinet
 
-def helper_hindi_senti(Hwordnet_items,Hsentinet):
-    print("word net item",Hwordnet_items)
+
+def helper_hindi_senti(Hwordnet_items, Hsentinet):
+    print("word net item", Hwordnet_items)
     # print(IDS)
-    for pos,ID in Hwordnet_items:
+    for pos, ID in Hwordnet_items:
         ID = int(ID)
-        print(ID,pos)
-        if(ID in Hsentinet.keys()):
-            print("present {} times in hindi sentinet".format(len(Hsentinet[ID])))
-            print("sentinet item",Hsentinet[ID])
+        print(ID, pos)
+        if (ID in Hsentinet.keys()):
+            print("present {} times in hindi sentinet".format(
+                len(Hsentinet[ID])))
+            print("sentinet item", Hsentinet[ID])
             for entry in Hsentinet[ID]:
-                if(entry[0]==pos):
-                    if(entry[1]>entry[2]):
+                if (entry[0] == pos):
+                    if (entry[1] > entry[2]):
                         return 'p'
-                    elif(entry[1]<entry[2]):
+                    elif (entry[1] < entry[2]):
                         return 'n'
                     else:
                         return 'b'
-    
+
     return 'i'
+
 
 def load_custom_senti_file(file_path):
     data = {}
     print("LOADDING\n\n")
-    with open(file_path,'r') as fp:
+    with open(file_path, 'r') as fp:
         for i, line in enumerate(fp):
             temp = line.split(" ")
             print(temp)
 
             data[temp[0]] = temp[1][0]
-    
+
     return data
 
-def get_def_eng_senti(word,word_polarity_scores):
-    if(word in word_polarity_scores.keys()):
-        if(word_polarity_scores[word] < -0.5):
+
+def get_def_eng_senti(word, word_polarity_scores):
+    if (word in word_polarity_scores.keys()):
+        if (word_polarity_scores[word] < -0.5):
             return 'n'
-        elif(word_polarity_scores[word] > 0.5):
+        elif (word_polarity_scores[word] > 0.5):
             return "p"
         else:
             return "b"
     else:
         return 'i'
 
-def get_def_hinglish_senti(word,Hwordnet,Hsentinet):
+
+def get_def_hinglish_senti(word, Hwordnet, Hsentinet):
     hinglish, hindi_word = wsd.preprocess_transliterate(word)
-    if(hindi_word in Hwordnet.keys()):
-        return helper_hindi_senti(Hwordnet[hindi_word],Hsentinet)
+    if (hindi_word in Hwordnet.keys()):
+        return helper_hindi_senti(Hwordnet[hindi_word], Hsentinet)
     else:
         print("word not present in hindi")
         return "i"
 
-def get_eng_senti(word,word_polarity_scores,custom_dict):
-    if(custom_dict != {}):
-        if(word in custom_dict.keys()):
+
+def get_eng_senti(word, word_polarity_scores, custom_dict):
+    if (custom_dict != {}):
+        if (word in custom_dict.keys()):
             return custom_dict[word]
         else:
-            return get_def_eng_senti(word,word_polarity_scores)
+            return get_def_eng_senti(word, word_polarity_scores)
     else:
-        return get_def_eng_senti(word,word_polarity_scores)
+        return get_def_eng_senti(word, word_polarity_scores)
 
-def get_hinglish_senti(word,Hwordnet,Hsentinet,custom_dict):
-    if(custom_dict != {}):
-        if(word in custom_dict.keys()):
+
+def get_hinglish_senti(word, Hwordnet, Hsentinet, custom_dict):
+    if (custom_dict != {}):
+        if (word in custom_dict.keys()):
             return custom_dict[word]
         else:
-            return get_def_hinglish_senti(word,Hwordnet,Hsentinet)
+            return get_def_hinglish_senti(word, Hwordnet, Hsentinet)
     else:
-        return get_def_hinglish_senti(word,Hwordnet,Hsentinet)
+        return get_def_hinglish_senti(word, Hwordnet, Hsentinet)
 
-def sentiment_engine(request,prev_sent,start_index,last_row_id):
+
+def sentiment_engine(request, prev_sent, start_index, last_row_id):
     total_num_of_sent = len(prev_sent)
     print("\n\n\n ----Running sentiment engine-----")
 
     CUSTOM_MODEL = False
-    tk = TweetTokenizer(preserve_case = False)
+    tk = TweetTokenizer(preserve_case=False)
     sentiment_collection = database.get_collection('sentiment')
-    mapping = ['n','i','p']
+    mapping = ['n', 'i', 'p']
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
     model_url = request.form.getlist('text')[0]
     eng_senti_file = request.files['file1']
@@ -367,25 +387,29 @@ def sentiment_engine(request,prev_sent,start_index,last_row_id):
     print("Loading default hindi word net and hindi word senti net to provide suggestions")
     HWN = "/home/shivasankaran/HindiWN_1_5/database/index_txt"
     HWSN = "/home/shivasankaran/gk-hinglish-sentiment/hindi_dict.txt"
-    Hwordnet,Hsentinet = load_hindi_nets(HWN,HWSN)
+    Hwordnet, Hsentinet = load_hindi_nets(HWN, HWSN)
     CUSTOM_WORD_HINGLISH_SENT_FILE = False
 
-    if(eng_senti_file.filename != ''):
+    if (eng_senti_file.filename != ''):
         print("Custom english sentiment file is uploaded")
-        eng_senti_file.save('uploads/{}_eng_senti'.format(eng_senti_file.filename))
-        english_senti_dict = load_custom_senti_file('uploads/{}_eng_senti'.format(eng_senti_file.filename))
+        eng_senti_file.save(
+            'uploads/{}_eng_senti'.format(eng_senti_file.filename))
+        english_senti_dict = load_custom_senti_file(
+            'uploads/{}_eng_senti'.format(eng_senti_file.filename))
         CUSTOM_WORD_ENGLISH_SENT_FILE = True
 
-    if(heng_senti_file.filename != ''):
+    if (heng_senti_file.filename != ''):
         print("Custom hinglish sentiment file is uploaded")
-        heng_senti_file.save('uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
-        hinglish_senti_dict = load_custom_senti_file('uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
+        heng_senti_file.save(
+            'uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
+        hinglish_senti_dict = load_custom_senti_file(
+            'uploads/{}_hinglish_senti'.format(heng_senti_file.filename))
         CUSTOM_WORD_HINGLISH_SENT_FILE = True
 
-    if(model_url == ''):
+    if (model_url == ''):
         model_url = "ganeshkharad/gk-hinglish-sentiment"
     # if(model_url != ''):
-    print("Loading CUSTOM MODEL at: ",model_url)
+    print("Loading CUSTOM MODEL at: ", model_url)
     tokenizer = AutoTokenizer.from_pretrained(model_url)
     model = AutoModelForSequenceClassification.from_pretrained(model_url)
     print("Model loaded")
@@ -398,32 +422,32 @@ def sentiment_engine(request,prev_sent,start_index,last_row_id):
         #     scores = sia.polarity_scores(sentence)
         #     predicted_label = mapping[np.array(list(scores.values())[:-1]).argmax()]
 
-
         # else:
         encoded_input = tokenizer(sentence, return_tensors='pt')
         output = model(**encoded_input)
-        scores = F.softmax(output.logits,dim=1).detach().cpu().numpy()[0]
+        scores = F.softmax(output.logits, dim=1).detach().cpu().numpy()[0]
         predicted_label = mapping[scores.argmax()]
 
         print(predicted_label)
-    
+
     flag = 1
     for i in range(start_index-1, total_num_of_sent):
         sentence = prev_sent[i]['sentence']
         # indivudal words
         word_emotions = []
         for word in tk.tokenize(sentence):
-            emo = get_eng_senti(word,word_polarity_scores,english_senti_dict)
-            if(emo == 'i'):
-                emo = get_hinglish_senti(word,Hwordnet,Hsentinet,hinglish_senti_dict)
-            word_emotions.append([word,emo])
+            emo = get_eng_senti(word, word_polarity_scores, english_senti_dict)
+            if (emo == 'i'):
+                emo = get_hinglish_senti(
+                    word, Hwordnet, Hsentinet, hinglish_senti_dict)
+            word_emotions.append([word, emo])
         print("!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>>>.")
         print(word_emotions)
 
         ###
         sentiment_collection.insert_one({
             'sentence_tag': predicted_label,
-            'word_tags':word_emotions,
+            'word_tags': word_emotions,
             'tag_id': last_row_id + 1
         })
         last_row_id = last_row_id + 1
@@ -432,20 +456,19 @@ def sentiment_engine(request,prev_sent,start_index,last_row_id):
     print("----RUN success-----")
 
 
-
 @app.route('/admin-file-upload', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def admin_file_upload():
     # requestdata = json.loads(request.data)
     # print(requestdata)
-    print(request.files['file']) 
+    print(request.files['file'])
 
     file = request.files['file']
     file.save('uploads/{}'.format(file.filename))
     # requestdata = json.loads(requestdata['body'])
 
     # file = requestdata['file']
-    # print('FILE = ', file) 
+    # print('FILE = ', file)
     import pandas as pd
     # os.system('db.py 1 {}'.format(file.filename))
     sentences_collection = database.get_collection('sentences')
@@ -500,9 +523,8 @@ def admin_file_upload():
     print(total_num_of_sent)
     print(prev_sent[start_index-1])
 
-
     ##
-    sentiment_engine(request,prev_sent,start_index,last_row_id)
+    sentiment_engine(request, prev_sent, start_index, last_row_id)
     ##
 
     for i in range(start_index-1, total_num_of_sent):
@@ -527,6 +549,7 @@ def admin_file_upload():
         })
         last_row_id = last_row_id + 1
     return redirect('{}/admin'.format(frontend))
+
 
 @app.route('/sentence-schema-creation', methods=['GET', 'POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -583,7 +606,7 @@ def csv_download():
     users_collection = database.get_collection('users')
 
     print('username = ', username)
-    if(username != 'ALL'):
+    if (username != 'ALL'):
         user = users_collection.find({'username': username})
         user = list(user)
         print(user)
@@ -611,24 +634,24 @@ def csv_download():
                 lang_ind_count = 0
 
                 for i in range(len(tag)):
-                    if(tag[i]['value'] == 'e'):
+                    if (tag[i]['value'] == 'e'):
                         en_count += 1
-                    elif(tag[i]['value'] == 'h'):
+                    elif (tag[i]['value'] == 'h'):
                         hi_count += 1
-                    elif(tag[i]['value'] == 'u'):
+                    elif (tag[i]['value'] == 'u'):
                         lang_ind_count += 1
                     token_count += 1
 
                 max_w = max(en_count, hi_count)
 
                 cmi_score = 0
-                if(token_count > lang_ind_count):
+                if (token_count > lang_ind_count):
                     cmi_score = 100 * \
                         (1 - (max_w / (token_count - lang_ind_count)))
                 else:
                     cmi_score = 0
 
-                if(cmi_score >= float(cmi)):
+                if (cmi_score >= float(cmi)):
                     row.append(cmi_score)
                     writer.writerow(row)
                 # break
@@ -662,26 +685,26 @@ def csv_download():
                     lang_ind_count = 0
 
                     for i in range(len(tag)):
-                        if(tag[i]['value'] == 'e'):
+                        if (tag[i]['value'] == 'e'):
                             en_count += 1
-                        elif(tag[i]['value'] == 'h'):
+                        elif (tag[i]['value'] == 'h'):
                             hi_count += 1
-                        elif(tag[i]['value'] == 'u'):
+                        elif (tag[i]['value'] == 'u'):
                             lang_ind_count += 1
                         token_count += 1
 
                     max_w = max(en_count, hi_count)
 
                     cmi_score = 0
-                    if(token_count > lang_ind_count):
+                    if (token_count > lang_ind_count):
                         cmi_score = 100 * \
                             (1 - (max_w / (token_count - lang_ind_count)))
                     else:
                         cmi_score = 0
 
-                    if(cmi_score >= float(cmi)):
+                    if (cmi_score >= float(cmi)):
                         row.append(cmi_score)
-                        if(single_user['admin'] is False):
+                        if (single_user['admin'] is False):
                             writer.writerow(row)
                     # break
 
@@ -773,7 +796,7 @@ def compare_annotators():
                    empty, grammar_2, date_2, tag_2, link_2, hashtag_2, time_2, empty, grammer_same, words_with_similar_annotation, total_words, kappa_score]
 
             print(kappa_score, type(kappa_score))
-            if(float(str(kappa_score)) >= float(kappa)):
+            if (float(str(kappa_score)) >= float(kappa)):
                 writer.writerow(row)
             counter -= 1
             # break
@@ -918,5 +941,82 @@ def all_sentence():
     return jsonify({'result': res['sentTag']})
 
 
+@app.route('/getWordFreqeucy', methods=['GET'])
+@cross_origin()
+def api_getWordFrequency():
+    word = request.args.get("word")
+
+    col1 = db.Frequency
+    docs = col1.find({'Word': word})
+    l = []
+    for d in docs:
+        del d['_id']
+        l.append(d)
+    return jsonify(json.loads(json.dumps(l)))
+
+
+@app.route('/saveFrequency', methods=['POST'])
+@cross_origin()
+def update_whitelisting():
+    if request.method == 'POST':
+        data = request.json
+        collection = db.Frequency
+        col1 = db.Words
+
+        for i in data:
+            word = i['Word']
+            tag = i['Tag']
+            # print(word)
+            # print(tag)
+            docs = col1.find({'Word': word})
+            curr = list(docs)
+            if len(curr) == 0:
+                dict = {
+                    'Word': word,
+                    'Tag': {
+                        "person": 0,
+                        "orgnz": 0,
+                        "product": 0,
+                        "date": 0,
+                        "place": 0,
+                        "slang": 0,
+                        "none": 0,
+                    }
+                }
+                # print(dict)
+
+                dict1 = {'Word': word}
+                x = col1.insert_one(dict1)
+                z = collection.insert_one(dict)
+            docs = collection.find({'Word': word})
+            for d in docs:
+                # print(d)
+                dict2 = d["Tag"]
+                # print(dict2)
+                dict2[tag] += 1
+                myquery = {'Word': word}
+                newvalues = {"$set": {'Tag': dict2}}
+                collection.update_one(myquery, newvalues)
+
+        return jsonify({"msg": "successful"})
+
+
+@app.route('/initialTagging', methods=['GET', 'POST'])
+@cross_origin()
+def api_initialtagging():
+    if request.method == 'POST':
+        # text = request.args.get("word")
+        # ner_model = pipeline('ner', model=model, tokenizer=tokenizer)
+        # x = ner_model(text)
+        text = str(request.json["data"])
+        payload = {
+            "inputs": text
+        }
+        response = requests.post(API_URL, headers=headers, json=payload)
+        # print(response.json())
+        return jsonify(response.json())
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+    client2.close()
