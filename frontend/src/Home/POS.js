@@ -2,7 +2,7 @@ import React, { Component }  from 'react';
 import '../css/POS.css';
 import Navbar from '../Components/POS_navbar';
 import Leftbox from '../Components/POS_Leftbox';
-
+import { Container, Row, Col } from 'react-grid-system';
 
 import { useState, useEffect } from 'react';
 
@@ -62,23 +62,31 @@ const listItems = data.map(
     }
   )
 
-
   return (
     <div className="App">
       <Navbar></Navbar>
-      <Leftbox></Leftbox>
-      {/* Take input from the user */}
-      <div className='textAreaBox'>
-      <textarea className='textArea' name="from-control" id="inputFromUsers" placeholder='Enter your text' cols="30" rows="14" value={text} onChange={writeText}></textarea>
-      <button id='GenerateBtn' className='btn' onClick={generateTag}> Generate </button>
-      </div>
 
-      {/* Generate sentence */}
-      <div className='generatedBox'>
-        <h3>Individual POS Tag</h3> 
-        {listItems}
-        
-      </div>
+      <Container>
+        <Row>
+        <Col sm={4}>
+        <Leftbox></Leftbox>
+        </Col>
+        <Col sm={8}>
+        {/* Take input from the user */}
+        <div className='textAreaBox'>
+        <textarea className='textArea' name="from-control" id="inputFromUsers" placeholder='Enter your text' cols="30" rows="14" value={text} onChange={writeText}></textarea>
+        <button id='GenerateBtn' className='btn' onClick={generateTag}> Generate </button>
+        </div>
+
+        {/* Generate sentence */}
+        <div className='generatedBox'>
+          <h3>Individual POS Tag</h3> 
+          {listItems}
+        </div> 
+        </Col>
+        </Row>
+      </Container>
+      
       
 
     </div>
